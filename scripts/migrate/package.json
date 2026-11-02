@@ -1,0 +1,13 @@
+{
+  "name": "crosslesson-migrate",
+  "private": true,
+  "type": "module",
+  "description": "예전 crosslesson.com(MySQL) 데이터를 Firebase로 옮기는 일회용 스크립트",
+  "scripts": {
+    "users": "node import-users.mjs",
+    "lessons": "node import-lessons.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}

@@ -1,0 +1,179 @@
+// 레슨 데이터 접근 계층
+// Firestore
+//   lessons/{no}        { no, uid, authorName, teach, learn, sido, region, ageMin, ageMax,
+//                         content, closed, views, createdAt, updatedAt }
+//   counters/lessons    { last }  ← 마지막 레슨 번호. 새 레슨은 last + 1 번 (예전 번호를 이어감)
+// 로컬 모드: localDb (같은 모양)
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  increment,
+  limit,
+  orderBy,
+  query,
+  runTransaction,
+  startAfter,
+  updateDoc,
+  where,
+} from 'firebase/firestore/lite'
+import { db } from '../firebase/config'
+import { delay, readDb, writeDb } from './localDb'
+
+export const PAGE_SIZE = 20
+export const CONTENT_MIN = 10
+export const CONTENT_MAX = 3000
+export const REGION_MAX = 40
+
+const lessonsCol = () => collection(db, 'lessons')
+const lessonRef = (no) => doc(db, 'lessons', String(no))
+const counterRef = () => doc(db, 'counters', 'lessons')
+const byNewest = (a, b) => b.no - a.no
+
+// 사용자가 고칠 수 있는 필드만 골라 냅니다.
+function pickFields(f) {
+  return {
+    teach: f.teach,
+    learn: f.learn,
+    sido: f.sido,
+    region: f.region.trim(),
+    ageMin: f.ageMin,
+    ageMax: f.ageMax,
+    content: f.content.trim(),
+    closed: Boolean(f.closed),
+  }
+}
+
+const matches = (l, f) =>
+  (!f.teach || l.teach === f.teach) && (!f.learn || l.learn === f.learn) && (!f.sido || l.sido === f.sido)
+
+// 레슨 목록을 최신 번호순으로 PAGE_SIZE 개씩 가져옵니다.
+// filters: { teach, learn, sido } (없으면 전체)
+// 반환: { lessons, next }  next 가 null 이면 마지막 페이지
+export async function listLessons(filters = {}, cursor = null) {
+  if (db) {
+    const parts = []
+    if (filters.teach) parts.push(where('teach', '==', filters.teach))
+    if (filters.learn) parts.push(where('learn', '==', filters.learn))
+    if (filters.sido) parts.push(where('sido', '==', filters.sido))
+    parts.push(orderBy('no', 'desc'))
+    if (cursor) parts.push(startAfter(cursor))
+    parts.push(limit(PAGE_SIZE + 1))
+    const snap = await getDocs(query(lessonsCol(), ...parts))
+    const docs = snap.docs.slice(0, PAGE_SIZE)
+    return {
+      lessons: docs.map((d) => d.data()),
+      next: snap.docs.length > PAGE_SIZE ? docs[docs.length - 1] : null,
+    }
+  }
+  const all = Object.values(readDb().lessons).filter((l) => matches(l, filters)).sort(byNewest)
+  const start = cursor ?? 0
+  return delay({
+    lessons: all.slice(start, start + PAGE_SIZE),
+    next: all.length > start + PAGE_SIZE ? start + PAGE_SIZE : null,
+  })
+}
+
+export async function getLesson(no) {
+  if (db) {
+    const snap = await getDoc(lessonRef(no))
+    return snap.exists() ? snap.data() : null
+  }
+  return delay(readDb().lessons[no] ?? null)
+}
+
+export async function getLessonsByUser(uid) {
+  if (db) {
+    const snap = await getDocs(query(lessonsCol(), where('uid', '==', uid)))
+    return snap.docs.map((d) => d.data()).sort(byNewest)
+  }
+  return delay(Object.values(readDb().lessons).filter((l) => l.uid === uid).sort(byNewest))
+}
+
+// 새 레슨을 만들고 번호를 돌려줍니다. 번호는 counters/lessons 를 1 늘려서 정합니다.
+export async function createLesson(user, profile, fields) {
+  const now = Date.now()
+  const base = { uid: user.uid, authorName: profile.nickname, views: 0, createdAt: now, updatedAt: now }
+  if (db) {
+    return runTransaction(db, async (tx) => {
+      const counter = await tx.get(counterRef())
+      const no = (counter.exists() ? counter.data().last : 0) + 1
+      tx.set(lessonRef(no), { no, ...base, ...pickFields(fields) })
+      tx.set(counterRef(), { last: no })
+      return no
+    })
+  }
+  return delay(
+    writeDb((d) => {
+      const no = d.counter + 1
+      d.counter = no
+      d.lessons[no] = { no, ...base, ...pickFields(fields) }
+      return no
+    }),
+  )
+}
+
+export async function updateLesson(no, fields) {
+  const patch = { ...pickFields(fields), updatedAt: Date.now() }
+  if (db) {
+    await updateDoc(lessonRef(no), patch)
+    return
+  }
+  writeDb((d) => {
+    d.lessons[no] = { ...d.lessons[no], ...patch }
+  })
+}
+
+export async function setLessonClosed(no, closed) {
+  const patch = { closed, updatedAt: Date.now() }
+  if (db) {
+    await updateDoc(lessonRef(no), patch)
+    return
+  }
+  writeDb((d) => {
+    d.lessons[no] = { ...d.lessons[no], ...patch }
+  })
+}
+
+export async function deleteLesson(no) {
+  if (db) {
+    await deleteDoc(lessonRef(no))
+    return
+  }
+  writeDb((d) => {
+    delete d.lessons[no]
+  })
+}
+
+// 조회수 +1. 같은 브라우저 탭에서는 레슨마다 한 번만 셉니다. 실패해도 화면에는 영향 없음.
+export async function countView(no) {
+  const key = `crosslesson:viewed:${no}`
+  try {
+    if (sessionStorage.getItem(key)) return false
+    sessionStorage.setItem(key, '1')
+  } catch {
+    return false
+  }
+  try {
+    if (db) await updateDoc(lessonRef(no), { views: increment(1) })
+    else writeDb((d) => d.lessons[no] && (d.lessons[no].views += 1))
+    return true
+  } catch (e) {
+    console.warn('조회수 기록 실패:', e)
+    return false
+  }
+}
+
+// 닉네임을 바꾸면 내 레슨에 적힌 작성자 이름도 바꿉니다.
+export async function syncAuthorName(uid, nickname) {
+  if (db) {
+    const mine = await getLessonsByUser(uid)
+    await Promise.all(mine.map((l) => updateDoc(lessonRef(l.no), { authorName: nickname })))
+    return
+  }
+  writeDb((d) => {
+    Object.values(d.lessons).forEach((l) => l.uid === uid && (l.authorName = nickname))
+  })
+}

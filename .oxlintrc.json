@@ -1,0 +1,3 @@
+{
+  "ignorePatterns": ["dist", "node_modules", "scripts/migrate/node_modules", "tests/rules/node_modules"]
+}

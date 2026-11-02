@@ -1,0 +1,128 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function me() { return request.auth.uid; }
+    function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
+    function isStr(v, min, max) { return v is string && v.size() >= min && v.size() <= max; }
+    function isTime(v) { return v is int && v > 0; }
+
+    // src/data/categories.js 의 SIDO 와 같아야 합니다 ('' = 지정 안 함)
+    function isSido(v) {
+      return v in ['', '온라인', '서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종',
+                   '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주', '해외'];
+    }
+    function isAge(v) { return v == null || (v is int && v >= 10 && v <= 99); }
+    function isCategory(v) { return v is int && v >= 100 && v <= 999; }
+
+    // ---------- 회원 프로필 ----------
+    // 누구나 읽을 수 있고(닉네임·소개), 본인만 씁니다.
+    match /users/{uid} {
+      allow read: if true;
+      allow create, update: if signedIn() && me() == uid
+        && request.resource.data.keys().hasOnly(['nickname', 'intro', 'createdAt', 'updatedAt'])
+        && isStr(request.resource.data.nickname, 2, 12)
+        && isStr(request.resource.data.intro, 0, 300)
+        && isTime(request.resource.data.createdAt)
+        && isTime(request.resource.data.updatedAt);
+      allow delete: if signedIn() && me() == uid;
+    }
+
+    // ---------- 레슨 번호 카운터: counters/lessons = { last } ----------
+    // 새 레슨을 만들 때만, 같은 트랜잭션 안에서 정확히 1씩 늘릴 수 있습니다.
+    match /counters/lessons {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['last'])
+        && request.resource.data.last == 1
+        && existsAfter(/databases/$(database)/documents/lessons/1);
+      allow update: if signedIn()
+        && request.resource.data.keys().hasOnly(['last'])
+        && request.resource.data.last == resource.data.last + 1
+        && existsAfter(/databases/$(database)/documents/lessons/$(string(request.resource.data.last)));
+    }
+
+    // ---------- 레슨: lessons/{no} ----------
+    match /lessons/{lessonId} {
+      function counterPath() { return /databases/$(database)/documents/counters/lessons; }
+      function editable(d) {
+        return isCategory(d.teach) && isCategory(d.learn)
+          && isSido(d.sido)
+          && isStr(d.region, 0, 40)
+          && isAge(d.ageMin) && isAge(d.ageMax)
+          && (d.ageMin == null || d.ageMax == null || d.ageMin <= d.ageMax)
+          && isStr(d.content, 10, 3000)
+          && d.closed is bool
+          && isStr(d.authorName, 2, 12)
+          && isTime(d.updatedAt);
+      }
+
+      allow read: if true;
+
+      // 번호(no)는 카운터 다음 번호여야 하고, 같은 트랜잭션에서 카운터가 그 번호로 바뀌어야 합니다.
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['no', 'uid', 'authorName', 'teach', 'learn', 'sido', 'region',
+             'ageMin', 'ageMax', 'content', 'closed', 'views', 'createdAt', 'updatedAt'])
+        && request.resource.data.uid == me()
+        && request.resource.data.no == int(lessonId)
+        && request.resource.data.no == (exists(counterPath()) ? get(counterPath()).data.last + 1 : 1)
+        && getAfter(counterPath()).data.last == request.resource.data.no
+        && request.resource.data.views == 0
+        && isTime(request.resource.data.createdAt)
+        && editable(request.resource.data);
+
+      // 작성자 수정: 번호·작성자·조회수·작성일은 못 바꿉니다.
+      allow update: if signedIn() && resource.data.uid == me()
+        && !changed().hasAny(['no', 'uid', 'views', 'createdAt'])
+        && request.resource.data.keys().hasOnly(resource.data.keys().concat(['ageMin', 'ageMax']))
+        && editable(request.resource.data);
+
+      // 누구나 조회수만 1씩 올릴 수 있습니다.
+      allow update: if changed().hasOnly(['views'])
+        && request.resource.data.views == resource.data.views + 1;
+
+      allow delete: if signedIn() && resource.data.uid == me();
+    }
+
+    // ---------- 신청: applications/{lessonNo}_{applicantUid} ----------
+    match /applications/{appId} {
+      function lessonOf(no) { return get(/databases/$(database)/documents/lessons/$(string(no))).data; }
+      function isMine() { return appId.split('_')[1] == me(); }
+
+      // 하나씩 읽기: 신청자, 레슨 작성자. (내 신청이 없는지 확인하는 것도 허용)
+      allow get: if signedIn()
+        && (isMine() || resource.data.applicantUid == me() || resource.data.lessonOwnerUid == me());
+      // 목록: 내가 보낸 신청 또는 내 레슨에 온 신청만
+      allow list: if signedIn()
+        && (resource.data.applicantUid == me() || resource.data.lessonOwnerUid == me());
+
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['lessonNo', 'lessonOwnerUid', 'lessonTeach', 'lessonLearn',
+             'applicantUid', 'applicantName', 'message', 'status', 'reply', 'createdAt', 'updatedAt'])
+        && appId == string(request.resource.data.lessonNo) + '_' + me()
+        && request.resource.data.applicantUid == me()
+        && request.resource.data.lessonOwnerUid == lessonOf(request.resource.data.lessonNo).uid
+        && request.resource.data.lessonOwnerUid != me()
+        && lessonOf(request.resource.data.lessonNo).closed == false
+        && request.resource.data.lessonTeach == lessonOf(request.resource.data.lessonNo).teach
+        && request.resource.data.lessonLearn == lessonOf(request.resource.data.lessonNo).learn
+        && isStr(request.resource.data.applicantName, 2, 12)
+        && isStr(request.resource.data.message, 5, 1000)
+        && request.resource.data.status == 'pending'
+        && request.resource.data.reply == ''
+        && isTime(request.resource.data.createdAt)
+        && isTime(request.resource.data.updatedAt);
+
+      // 레슨 작성자: 수락/거절과 답장만
+      allow update: if signedIn() && resource.data.lessonOwnerUid == me()
+        && changed().hasOnly(['status', 'reply', 'updatedAt'])
+        && request.resource.data.status in ['accepted', 'rejected']
+        && isStr(request.resource.data.reply, 0, 1000)
+        && isTime(request.resource.data.updatedAt);
+
+      // 신청자: 취소
+      allow delete: if signedIn() && resource.data.applicantUid == me();
+    }
+  }
+}

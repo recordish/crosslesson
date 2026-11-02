@@ -1,0 +1,14 @@
+{
+  "name": "crosslesson-rules-test",
+  "private": true,
+  "type": "module",
+  "description": "firestore.rules 테스트 (Firestore 에뮬레이터에서 실행, Java 필요)",
+  "scripts": {
+    "test": "firebase emulators:exec --only firestore --project demo-crosslesson --config ../../firebase.json \"node rules.test.mjs ../../firestore.rules\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.0",
+    "firebase": "^13.1.0",
+    "firebase-tools": "^15.0.0"
+  }
+}

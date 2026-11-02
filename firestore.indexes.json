@@ -1,0 +1,123 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "teach",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "learn",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "sido",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "teach",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "learn",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "teach",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "sido",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "learn",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "sido",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "teach",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "learn",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "sido",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
