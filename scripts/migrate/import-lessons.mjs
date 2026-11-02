@@ -180,12 +180,22 @@ if (SUMMARY_ONLY) {
   warnings.forEach((w) => console.warn('  ⚠️', w))
 }
 
+// 이미 있는 번호(새 사이트에서 올라온 글, 또는 이미 옮긴 글)는 덮어쓰지 않습니다.
+const existing = new Set()
+for (let i = 0; i < docs.length; i += 300) {
+  const snaps = await db.getAll(...docs.slice(i, i + 300).map((d) => db.doc(`lessons/${d.no}`)))
+  snaps.filter((x) => x.exists).forEach((x) => existing.add(Number(x.id)))
+}
+const toWrite = docs.filter((d) => !existing.has(d.no))
+if (existing.size) console.log(`이미 있는 번호 ${existing.size}개는 건너뜀 (덮어쓰지 않음)`)
+console.log(`새로 쓸 레슨 ${toWrite.length}개`)
+
 if (!DRY_RUN) {
-  for (let i = 0; i < docs.length; i += 400) {
+  for (let i = 0; i < toWrite.length; i += 400) {
     const batch = db.batch()
-    docs.slice(i, i + 400).forEach((d) => batch.set(db.doc(`lessons/${d.no}`), d))
+    toWrite.slice(i, i + 400).forEach((d) => batch.set(db.doc(`lessons/${d.no}`), d))
     await batch.commit()
-    console.log(`  ${Math.min(i + 400, docs.length)} / ${docs.length}`)
+    console.log(`  ${Math.min(i + 400, toWrite.length)} / ${toWrite.length}`)
   }
   // 카운터는 줄어들지 않게만 맞춥니다 (이전 도중에 새 레슨이 올라왔을 수도 있으니)
   await db.runTransaction(async (tx) => {
