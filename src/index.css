@@ -206,10 +206,6 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); o
 /* ---------- 로그인 ---------- */
 .auth { max-width: 400px; margin: 0 auto; }
 .auth-box { display: flex; flex-direction: column; gap: 12px; }
-.auth-form { display: flex; flex-direction: column; gap: 8px; }
-.auth-links { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; margin: 0; }
-.divider { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
-.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 .google-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   height: 44px; padding: 0 12px; width: 100%;

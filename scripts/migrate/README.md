@@ -13,8 +13,8 @@
    ```bash
    cd scripts/migrate
    npm install
-   GOOGLE_APPLICATION_CREDENTIALS=./service-account.json HASH=BCRYPT node import-users.mjs --dry-run
-   GOOGLE_APPLICATION_CREDENTIALS=./service-account.json HASH=BCRYPT node import-users.mjs
+   GOOGLE_APPLICATION_CREDENTIALS=./service-account.json node import-users.mjs --dry-run
+   GOOGLE_APPLICATION_CREDENTIALS=./service-account.json node import-users.mjs
    GOOGLE_APPLICATION_CREDENTIALS=./service-account.json node import-lessons.mjs --dry-run
    GOOGLE_APPLICATION_CREDENTIALS=./service-account.json node import-lessons.mjs
    ```
@@ -26,8 +26,8 @@
 
 `data/users.json`
 ```json
-[{ "legacyId": 123, "email": "a@b.com", "passwordHash": "$2y$10$...", "salt": "",
-   "nickname": "글로리", "intro": "", "joinedAt": "2016-01-26 13:05:00" }]
+[{ "legacyId": 123, "email": "a@gmail.com", "nickname": "글로리", "intro": "",
+   "joinedAt": "2016-01-26 13:05:00" }]
 ```
 
 `data/lessons.json`
@@ -42,18 +42,16 @@
 - 날짜 문자열은 한국 시간으로 읽습니다. 초 단위 유닉스 시간도 받습니다.
 - 보안 규칙을 벗어나는 값(나이 범위, 글자 수, 닉네임 길이, 시/도 이름)은 규칙에 맞게 다듬고 경고로 알려 줍니다.
 
-## 비밀번호 (`HASH`)
+## 로그인 (Google만)
 
-예전 PHP 가입 코드에서 비밀번호를 저장하는 줄을 보고 고릅니다.
+새 사이트는 Google 로그인만 씁니다. **비밀번호는 옮기지 않습니다.**
 
-| 코드 | HASH |
-| --- | --- |
-| `password_hash($pw, ...)` | `BCRYPT` |
-| `md5($pw)` | `MD5` |
-| `hash('sha256', $pw)` | `SHA256` |
-| 알 수 없음 / 솔트 섞는 방식 등 | `NONE` (회원은 "비밀번호를 잊었어요"로 새로 만듦) |
-
-⚠️ 실제 이전 전에 **테스트 계정 하나로 로그인이 되는지** 꼭 확인하세요.
+- 이메일이 있는 회원은 비밀번호 없는 계정(uid `legacy-{회원번호}`)으로 미리 만들어 둡니다.
+  같은 **Gmail 주소**로 Google 로그인하면 그 계정에 이어지는 것이 목표입니다 (Firebase 기본 설정 "이메일 주소당 계정 1개").
+  ⚠️ 실제 이전 전에 테스트 계정 하나로 꼭 확인하세요 (로그인 후 예전 레슨에 수정 버튼이 보이는지).
+- **Gmail이 아닌 주소**(네이버, 다음 등)로 가입했던 회원은 Google 로그인으로 이어지지 않습니다.
+  프로필과 레슨은 그대로 남고, 요청이 오면 관리자가 레슨 작성자(`uid`)를 새 계정으로 바꿔 줄 수 있습니다.
+- 시험 실행(`--dry-run`)을 하면 전체 회원 중 Gmail 회원이 몇 명인지 알려 줍니다.
 
 ## 개인정보
 

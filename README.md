@@ -9,7 +9,7 @@
 - **레슨 등록 · 수정 · 삭제 · 모집 완료**: 레슨 번호는 예전 번호를 이어서 붙습니다 (#5859부터)
 - **신청**: 레슨 하나에 한 번. 작성자만 내용을 봅니다. 작성자는 수락/거절하고 답장을 남깁니다
 - **내 활동**: 내 레슨, 받은 신청, 보낸 신청
-- **로그인**: Google, 이메일/비밀번호(가입, 비밀번호 재설정). 첫 로그인 때 닉네임을 정합니다
+- **로그인**: Google 로그인만 씁니다. 첫 로그인 때 닉네임을 정합니다
 - **예전 주소 연결**: `lesson.php?no=5858` → `/lesson/5858`, `class.php?d=204` → `/?teach=204` 등 (`src/components/LegacyRedirect.jsx`, `firebase.json`)
 
 ## 실행
@@ -49,7 +49,7 @@ Firebase 설정값(`.env.local`)이 없으면 **로컬 모드**로 동작합니�
     │   ├── lessonService.js       #   레슨 목록/상세/등록(번호 트랜잭션)/수정/조회수
     │   ├── applicationService.js  #   신청/취소/수락·거절
     │   ├── profileService.js      #   닉네임·소개
-    │   ├── authService.js         #   Google·이메일 로그인, 로컬 테스트 사용자
+    │   ├── authService.js         #   Google 로그인, 로컬 테스트 사용자
     │   └── localDb.js             #   로컬 모드 저장소 + 예시 데이터
     ├── contexts/AuthContext.jsx   # 로그인 사용자 + 프로필
     ├── hooks/                     # useLessons(목록·더 보기), useNow, useTitle
@@ -74,7 +74,7 @@ Firebase 설정값(`.env.local`)이 없으면 **로컬 모드**로 동작합니�
 ## Firebase 설정 (처음 한 번)
 
 1. [Firebase 콘솔](https://console.firebase.google.com)에서 크로스레슨 전용 프로젝트 만들기 (메모 앱 recordish 와 별도) → **웹 앱 추가**(Firebase 호스팅도 설정 체크) → 설정값을 `.env.production`에 넣고 커밋 (`.env.example` 참고. 브라우저에 공개되는 값이라 커밋해도 됩니다)
-2. **Authentication → 로그인 방법**: Google, 이메일/비밀번호 사용 설정
+2. **Authentication → 로그인 방법**: Google만 사용 설정 (이메일/비밀번호는 꺼 둡니다)
 3. **Authentication → 설정 → 승인된 도메인**: `crosslesson.com` 추가
 4. **Firestore Database 만들기**: 프로덕션 모드, 위치 `asia-northeast3`(서울)
 5. 규칙과 색인 배포:
