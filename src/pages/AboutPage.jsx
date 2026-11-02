@@ -19,11 +19,9 @@ export default function AboutPage() {
       <ul className="tips">
         <li>처음에는 사람이 많은 공공장소나 화상으로 만나세요.</li>
         <li>레슨을 핑계로 돈을 요구하면 응하지 마세요.</li>
-        <li>문제가 있으면 카카오채널로 알려 주세요.</li>
       </ul>
       <p className="actions start">
         <Link to="/" className="button">레슨 둘러보기</Link>
-        <a href="https://pf.kakao.com/_CIchK" target="_blank" rel="noreferrer" className="button">카카오채널 문의</a>
       </p>
     </article>
   )
