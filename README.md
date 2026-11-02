@@ -74,8 +74,8 @@ Firebase 설정값(`.env.local`)이 없으면 **로컬 모드**로 동작합니�
 - 선택지 값은 `src/data/lessonOptions.js`에 있습니다
   (수업 방식 `online`/`offline` 둘 다 참 = 둘 다, 요일 `mon`~`sun`, 시간대 `morning`/`afternoon`/`evening`,
   실력 `hobby`/`skilled`/`pro`, 수준 `beginner`/`basic`/`intermediate`, 빈 값 = 선택 안 함)
-- 과목 코드(`teach`, `learns`)는 예전 사이트 번호를 그대로 씁니다 (101 영어, 204 바이올린, 306 영상, 402 프로그래밍, 601 수영 …).
-  **나머지 과목 이름은 예전 DB의 분류표와 대조해서 `src/data/categories.js`를 고쳐야 합니다.**
+- 과목 코드(`teach`, `learns`)는 예전 사이트 번호와 이름을 그대로 씁니다 (101 영어, 204 바이올린, 306 영상, 402 프로그래밍, 601 수영 …, `src/data/categories.js`).
+  예전에 숨겼던 과목(포르투갈어, 태권도 등)은 옛 글에 이름만 보이고 새로 고를 수는 없습니다
 - 보안 규칙이 필드 종류와 길이, 작성자, 레슨 번호 순서, 중복 신청, 자기 레슨 신청, 모집 완료 레슨 신청을 서버에서 검사합니다.
   테스트: `cd tests/rules && npm install && npm test` (Java 필요, 55개 항목)
 - 목록 필터 조합마다 복합 색인이 필요합니다(23개). 필터를 바꾸면 `node scripts/gen-indexes.mjs`로 다시 만드세요
@@ -125,7 +125,6 @@ npx firebase-tools deploy --only hosting --project <프로젝트ID>
 
 ## 다음에 할 일
 
-- [ ] 과목 코드표를 예전 DB 분류표와 맞추기
 - [ ] 회원·레슨 데이터 이전, 개인정보처리방침에 국외 이전(Google Firebase) 고지
 - [ ] 레슨 상세 페이지 검색 노출(프리렌더링), sitemap.xml
 - [ ] 카카오 로그인 (서버 함수가 필요해 Firebase Blaze 요금제 필요)

@@ -13,7 +13,7 @@
 //   learns     ← learn 하나를 목록으로 ([306])
 //   online/offline ← mode 가 있으면 그대로, 없으면 장소에 "온라인·화상·줌" 등이 있으면 온라인,
 //                    소개 글에만 있으면 둘 다, 아니면 만나서
-//   days       ← 예전 요일 항목, timeSlots(시간대) ← 빈 목록 ("시간 협의"로 보임)
+//   days       ← 예전 요일 항목, timeSlots ← 예전 시간 코드 (convert-lessons.mjs 가 오전/오후/저녁으로 바꿔 둠)
 //   teachLevel, learnLevel ← '' (선택 안 함)
 //
 // - 레슨 번호(no)를 그대로 써서 예전 주소 lesson.php?no=5858 → /lesson/5858 이 이어집니다.
@@ -23,7 +23,7 @@
 //
 // 실행: GOOGLE_APPLICATION_CREDENTIALS=./service-account.json node import-lessons.mjs [--dry-run]
 import { isCategory, SIDO } from '../../src/data/categories.js'
-import { DAYS, MAX_LEARNS, ordered } from '../../src/data/lessonOptions.js'
+import { DAYS, MAX_LEARNS, ordered, TIME_SLOTS } from '../../src/data/lessonOptions.js'
 import { db, DRY_RUN, readJson, toMillis } from './admin.mjs'
 
 const lessons = readJson('data/lessons.json')
@@ -103,12 +103,14 @@ function normalize(l) {
   if (ageMin != null && ageMax != null && ageMin > ageMax) [ageMin, ageMax] = [ageMax, ageMin]
   const { online, offline } = parseMode(l, no)
   const sido = offline ? guessSido(l) : ''
+  // 회원번호가 없는 글(비회원 글)은 글마다 따로 주인을 둡니다 (아무도 수정할 수 없음)
+  const uid = l.legacyUserId ? `legacy-${l.legacyUserId}` : `legacy-guest-${no}`
   let authorName = chars(l.authorName).slice(0, 12).join('')
-  if (authorName.length < 2) authorName = `회원${l.legacyUserId}`
+  if (authorName.length < 2) authorName = l.legacyUserId ? `회원${l.legacyUserId}` : '예전 회원'
   const createdAt = toMillis(l.createdAt)
   return {
     no,
-    uid: `legacy-${l.legacyUserId}`,
+    uid,
     authorName,
     teach,
     learns,
@@ -119,7 +121,7 @@ function normalize(l) {
     sido,
     region: chars(l.region).slice(0, 40).join(''),
     days: parseDays(l.days, no),
-    timeSlots: [],
+    timeSlots: ordered(TIME_SLOTS, Array.isArray(l.timeSlots) ? l.timeSlots : []),
     ageMin,
     ageMax,
     content: content.join(''),

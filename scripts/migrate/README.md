@@ -5,8 +5,15 @@
 ## 순서
 
 1. **백업**: 카페24 phpMyAdmin → 내보내기 → SQL 파일로 전체 저장
-2. **JSON 만들기**: 회원 테이블과 레슨 테이블을 아래 형식의 `data/users.json`, `data/lessons.json`으로 바꿉니다.
-   (테이블 구조를 알려 주시면 변환 스크립트를 따로 만들어 드립니다. `data/`는 git에 올라가지 않습니다)
+2. **JSON 만들기** (`data/`는 git에 올라가지 않습니다)
+   - **레슨**: phpMyAdmin → SQL 탭에서 아래 쿼리 실행 → 결과 내보내기(형식 JSON) → `data/legacy-lessons.json`으로 저장 → `node convert-lessons.mjs`
+     ```sql
+     SELECT no, member_no, name, tp, title, ment, theday, thetime, theage,
+            reg_date, last_update, hit, hide, prev, next, etc1, etc2, etc3, etc4
+     FROM mini_board_language ORDER BY no DESC;
+     ```
+     → `data/lessons.json`이 만들어집니다. 숨긴 글(`hide=1`)은 빠지고, `--include-hidden`을 붙이면 "모집 완료"로 옮깁니다
+   - **회원**: 아래 형식의 `data/users.json` (회원 테이블 `cl_member`에서. 변환 방법은 따로 안내)
 3. **서비스 계정 키**: Firebase 콘솔 → 프로젝트 설정 → 서비스 계정 → 새 비공개 키 → `service-account.json`으로 저장 (**절대 커밋 금지**)
 4. **연습 실행**: `--dry-run`을 붙이면 아무것도 저장하지 않고 경고만 보여 줍니다
 5. **실행**:
@@ -21,6 +28,19 @@
 
 에뮬레이터로 먼저 연습하려면 `GOOGLE_APPLICATION_CREDENTIALS` 대신
 `FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099`를 지정하세요.
+
+## 예전 테이블 (knight12n DB)
+
+| 테이블 | 내용 | 옮김 |
+| --- | --- | --- |
+| `mini_board_language` | 레슨 글. `prev`=가르칠 과목, `next`=배울 과목, `etc2`=위치, `theday`=요일, `thetime`=시간 코드(10/14/16/18/20), `theage`=나이대, `hit`=조회수, `hide`=숨김 | ✅ |
+| `cl_member` | 회원. `no`, `email`, `username`(닉네임), `bio`(소개), `reg_date`만 씀 | ✅ |
+| `cl_major` | 과목 이름 (영/한/일/프/스) | 코드표는 `src/data/categories.js`에 반영 |
+| `cl_apply`, `cl_letters*`, `cl_mssg`, `lesson_comment`, `cl_scrap` | 신청, 쪽지, 댓글, 스크랩 | ❌ |
+| `access_logs`, `cl_visit*`, `cl_searched*`, `cl_count` | 방문·검색 기록 | ❌ |
+| `mini_*`, `luv_member0`, `luun`, `luup`, `fab_news` | 예전 게시판 프로그램, 다른 서비스 데이터 | ❌ (주민번호 등 민감 정보 칸이 있어 옮기지 않음) |
+
+시간 코드: 10 → 오전, 14·16 → 오후, 18·20 → 저녁. 비회원 글(`member_no`=0)은 글마다 따로 주인(`legacy-guest-{번호}`)을 둡니다.
 
 ## 형식
 

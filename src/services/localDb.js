@@ -26,7 +26,7 @@ function seed() {
         content: '자유형, 배영부터 접영까지 알려드릴 수 있어요.\n대신 영어 회화를 배우고 싶습니다. 주말 오전 가능해요.',
       }, 9),
       2: lesson(2, 'sample-2', '코딩하는영어쌤', {
-        teach: 101, learns: [402, 401], teachLevel: 'skilled', learnLevel: 'beginner',
+        teach: 101, learns: [402, 403], teachLevel: 'skilled', learnLevel: 'beginner',
         online: true, offline: false, region: '줌 화상', days: ['mon', 'tue', 'wed', 'thu', 'fri'], timeSlots: ['evening'],
         content: '해외 근무 경험으로 비즈니스 영어를 알려드려요.\n파이썬이나 엑셀을 처음부터 배우고 싶어요.',
       }, 4),
