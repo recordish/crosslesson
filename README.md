@@ -119,6 +119,29 @@ npx firebase-tools deploy --only hosting --project <프로젝트ID>
 5. 인증서 발급까지 몇 시간 걸릴 수 있습니다. 새 사이트가 잘 뜨는지 확인한 뒤 카페24 호스팅을 해지합니다
    (⚠️ 해지 전에 예전 DB를 반드시 내보내 두세요. 도메인은 호스팅을 해지해도 그대로 유지됩니다)
 
+## 안드로이드 앱 (Capacitor)
+
+Play 스토어의 기존 앱 `com.crosslesson.app`을 같은 패키지로 업데이트합니다. 앱은 빌드한 웹 화면(`dist/`)을 그대로 담습니다.
+**사이트 화면을 고치면 앱도 다시 빌드해서 올려야** 같은 화면이 보입니다 (데이터는 같은 Firebase 를 씀).
+
+- 앱 안 Google 로그인: 휴대폰 계정 선택창(`@capgo/capacitor-social-login`) → 받은 토큰으로 Firebase 로그인
+  - Firebase 에 안드로이드 앱과 서명 지문(SHA-1 `EF:8C:0C:D3:…:7D:67`)이 등록돼 있어야 합니다 (2026-11-02 등록 완료)
+  - Facebook·Apple·Twitter 는 안드로이드 빌드에서 뺌 (`capacitor.config.json`의 `SocialLogin.providers`). 넣으면 광고 ID 권한과 결제 라이브러리가 따라 들어옵니다
+- 권한: 인터넷, 로그인용 계정 권한뿐 (광고 ID 없음 → Play Console "광고 ID" 선언은 "아니요")
+- 서명: 기존 업로드 키(별칭 `jy1664`). **키 파일과 비밀번호는 저장소에 두지 않습니다.**
+  Google Play 앱 서명은 아직 사용하지 않아 **APK**로 업데이트합니다 (PEPK 로 키 등록 시도는 Play Console 에서 거부됨)
+
+### 출시 빌드
+```bash
+npm run build && npx cap sync android
+cd android
+export ANDROID_HOME=~/android-sdk ANDROID_KEYSTORE_PATH=/안전한/경로/upload.keystore \
+  ANDROID_KEYSTORE_PASSWORD=… ANDROID_KEY_ALIAS=jy1664 ANDROID_KEY_PASSWORD=…
+./gradlew assembleRelease      # → app/build/outputs/apk/release/app-release.apk
+```
+- 버전: `android/app/build.gradle`의 `versionCode`를 올릴 때마다 1씩 키웁니다 (2026110201 → 2026110202 …), `versionName`도 함께
+- 아이콘·스플래시: `assets/`의 원본을 고친 뒤 `npx capacitor-assets generate --android`
+
 ## 예전 데이터 옮기기
 
 `scripts/migrate/README.md`를 보세요.
