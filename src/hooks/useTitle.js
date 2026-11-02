@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-const SITE = '크로스레슨'
+const SITE = 'Crosslesson'
 
 // 화면마다 브라우저 탭 제목을 바꿉니다.
 export function useTitle(title) {

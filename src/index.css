@@ -319,3 +319,8 @@ textarea[aria-invalid='true'], input[aria-invalid='true'] { border-color: var(--
   .talent-grid { grid-template-columns: 1fr; gap: 6px; }
   .talent-swap { justify-self: center; transform: rotate(90deg); line-height: 1; }
 }
+
+/* ---------- 앱(안드로이드)에서: 상태바·내비게이션바 아래로 내용이 들어가지 않게 ---------- */
+.header { padding-top: env(safe-area-inset-top, 0px); }
+.footer { padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+.form-actions { padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }

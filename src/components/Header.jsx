@@ -9,9 +9,9 @@ export default function Header() {
   return (
     <header className="header">
       <div className="header-inner">
-        <Link to="/" className="logo" aria-label="크로스레슨 홈">
+        <Link to="/" className="logo" aria-label="Crosslesson 홈">
           <img src="/favicon.svg" alt="" width="28" height="28" />
-          <span>크로스레슨</span>
+          <span>Crosslesson</span>
         </Link>
         <nav className="nav">
           <NavLink to="/" end className={tab}>레슨 찾기</NavLink>
