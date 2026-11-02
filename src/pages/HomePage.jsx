@@ -6,7 +6,7 @@ import { useLessons } from '../hooks/useLessons'
 import { useNow } from '../hooks/useNow'
 import { useTitle } from '../hooks/useTitle'
 
-// 레슨 찾기. 필터는 주소에 남겨서(?teach=204&learn=306&sido=서울) 공유·뒤로 가기가 됩니다.
+// 레슨 찾기. 필터는 주소에 남겨서(?teach=204&learn=306&sido=서울&mode=online) 공유·뒤로 가기가 됩니다.
 // 예전 주소 class.php?d=204 → /?teach=204, learn.php?d=306 → /?learn=306 으로 연결됩니다(LegacyRedirect).
 export default function HomePage() {
   useTitle('')
@@ -14,9 +14,10 @@ export default function HomePage() {
   const teach = Number(params.get('teach')) || 0
   const learn = Number(params.get('learn')) || 0
   const sido = params.get('sido') ?? ''
-  const { lessons, loading, error, hasMore, loadMore } = useLessons({ teach, learn, sido })
+  const mode = ['online', 'offline'].includes(params.get('mode')) ? params.get('mode') : ''
+  const { lessons, loading, error, hasMore, loadMore } = useLessons({ teach, learn, sido, mode })
   const now = useNow(60000)
-  const filtered = Boolean(teach || learn || sido)
+  const filtered = Boolean(teach || learn || sido || mode)
 
   function setFilter(key, value) {
     const next = new URLSearchParams(params)
@@ -41,6 +42,14 @@ export default function HomePage() {
         <label>
           <span>가르쳐 줄 수 있는 과목</span>
           <CategorySelect value={learn} onChange={(v) => setFilter('learn', v)} emptyLabel="전체" />
+        </label>
+        <label>
+          <span>수업 방식</span>
+          <select value={mode} onChange={(e) => setFilter('mode', e.target.value)}>
+            <option value="">전체</option>
+            <option value="offline">만나서</option>
+            <option value="online">온라인</option>
+          </select>
         </label>
         <label>
           <span>지역</span>

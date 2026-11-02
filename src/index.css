@@ -154,7 +154,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); o
 .crumb { margin: 0 0 12px; font-size: 14px; color: var(--muted); }
 .lesson-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .lesson-head .cat { font-size: 16px; padding: 5px 14px; }
-.lesson-info { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 16px 0; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
+.lesson-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
 .lesson-info div { min-width: 0; }
 .lesson-info dt { font-size: 12px; color: var(--muted); }
 .lesson-info dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
@@ -233,3 +233,67 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); o
 .steps li { counter-increment: step; display: flex; flex-direction: column; padding: 14px 14px 14px 56px; position: relative; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); }
 .steps li::before { content: counter(step); position: absolute; left: 14px; top: 14px; width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 700; display: grid; place-items: center; }
 .tips { padding-left: 20px; }
+
+/* ---------- 레슨 등록 폼 ---------- */
+.lesson-form { gap: 20px; }
+.lesson-form .label { display: block; font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.lesson-form .label.small { font-size: 13px; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+.lesson-form label > .label { margin-bottom: 6px; }
+.req { color: var(--danger); font-weight: 700; }
+.form-section { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); padding: 16px; margin: 0; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.form-section legend, .legend-like { font-size: 16px; font-weight: 800; padding: 0 6px; margin: 0 0 0 -6px; display: flex; align-items: center; gap: 8px; color: var(--text); }
+.form-section .step { width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 13px; display: inline-grid; place-items: center; }
+.preview-section { background: transparent; border-style: dashed; }
+.field { display: flex; flex-direction: column; min-width: 0; }
+.field:focus { outline: none; }
+.sub-field { margin-top: 12px; }
+.label-row { display: flex; justify-content: space-between; align-items: center; }
+.label-row .label { margin: 0; white-space: nowrap; }
+.lesson-form .page-title { margin: 0; }
+.lesson-form .page-title + .muted { margin: -12px 0 0; }
+.hint { margin: 8px 0 0; }
+.field-error { margin: 6px 0 0; color: var(--danger); font-size: 14px; font-weight: 600; }
+.field-error::before { content: '⚠ '; }
+.field-warn { margin: 8px 0 0; padding: 8px 10px; border-radius: 8px; background: #fff4d6; color: #7a5a00; font-size: 14px; }
+@media (prefers-color-scheme: dark) { .field-warn { background: #3a3014; color: #f5d77a; } }
+textarea[aria-invalid='true'], input[aria-invalid='true'] { border-color: var(--danger); }
+.counter .under { color: var(--danger); font-weight: 600; }
+.notice.draft { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* 버튼 칩 */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip { --c: var(--primary); padding: 7px 12px; font-size: 14px; font-weight: 600; border-radius: 999px; border: 1.5px solid var(--border); background: var(--card); color: var(--text); position: relative; }
+.chip:hover:not(:disabled) { border-color: var(--c); }
+.chip.on { background: var(--c); border-color: var(--c); color: #fff; }
+@media (prefers-color-scheme: dark) { .chip.on { color: #111; } }
+.chip:disabled { opacity: 0.4; }
+.chip.group { --c: var(--g-etc); }
+.chip.group.g-language, .chip.item.g-language, .chip.on.g-language { --c: var(--g-language); }
+.chip.group.g-music, .chip.item.g-music, .chip.on.g-music { --c: var(--g-music); }
+.chip.group.g-art, .chip.item.g-art, .chip.on.g-art { --c: var(--g-art); }
+.chip.group.g-computer, .chip.item.g-computer, .chip.on.g-computer { --c: var(--g-computer); }
+.chip.group.g-exercise, .chip.item.g-exercise, .chip.on.g-exercise { --c: var(--g-exercise); }
+.chip.group.g-study, .chip.item.g-study, .chip.on.g-study { --c: var(--g-study); }
+.chip.group.on { background: transparent; color: var(--c); box-shadow: inset 0 0 0 1px var(--c); }
+.chip .dot { position: absolute; top: -2px; right: -2px; width: 9px; height: 9px; border-radius: 50%; background: var(--c); border: 2px solid var(--card); }
+.chip-sep { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
+.picker { display: flex; flex-direction: column; gap: 10px; border-radius: 10px; }
+.picker:focus { outline: none; }
+.picker.invalid { box-shadow: 0 0 0 2px var(--danger); padding: 8px; }
+.picker .items { padding: 10px; background: var(--bg); border-radius: 10px; }
+.picked { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.cat-empty { border: 1.5px dashed var(--border); color: var(--muted); font-weight: 600; }
+.mode { font-weight: 700; color: var(--text); }
+.mode.online { color: var(--primary-text); }
+.levels { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 10px 0 0; font-size: 14px; color: var(--muted); }
+.levels strong { color: var(--text); }
+.card.preview:hover { transform: none; border-color: var(--border); }
+
+/* 등록 버튼: 화면 아래에 붙어 있게 */
+.form-actions { position: sticky; bottom: 0; z-index: 5; padding: 12px 0; background: var(--bg); border-top: 1px solid var(--border); margin-top: -4px; }
+.form-actions .error { margin: 0 0 8px; }
+@media (max-width: 560px) {
+  .form-section { padding: 14px 12px; }
+  .form-actions .actions { flex-wrap: nowrap; }
+  .form-actions .actions > * { flex: 1; }
+}

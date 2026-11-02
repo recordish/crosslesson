@@ -5,7 +5,21 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "teach",
+          "fieldPath": "learns",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "online",
           "order": "ASCENDING"
         },
         {
@@ -19,8 +33,44 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "learn",
+          "fieldPath": "online",
           "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "learns",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "offline",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "offline",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "learns",
+          "arrayConfig": "CONTAINS"
         },
         {
           "fieldPath": "no",
@@ -47,12 +97,204 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
+          "fieldPath": "sido",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "learns",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "sido",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "online",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "sido",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "online",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "learns",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "sido",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "offline",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "sido",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "offline",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "learns",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
           "fieldPath": "teach",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "learn",
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "teach",
           "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "learns",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "teach",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "online",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "teach",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "online",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "learns",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "teach",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "offline",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "teach",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "offline",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "learns",
+          "arrayConfig": "CONTAINS"
         },
         {
           "fieldPath": "no",
@@ -83,11 +325,37 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "learn",
+          "fieldPath": "teach",
           "order": "ASCENDING"
         },
         {
           "fieldPath": "sido",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "learns",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "teach",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "sido",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "online",
           "order": "ASCENDING"
         },
         {
@@ -105,12 +373,64 @@
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "learn",
+          "fieldPath": "sido",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "online",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "learns",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "teach",
           "order": "ASCENDING"
         },
         {
           "fieldPath": "sido",
           "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "offline",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "no",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "teach",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "sido",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "offline",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "learns",
+          "arrayConfig": "CONTAINS"
         },
         {
           "fieldPath": "no",

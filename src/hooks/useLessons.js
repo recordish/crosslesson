@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { listLessons } from '../services/lessonService'
 
 // 필터에 맞는 레슨 목록 + "더 보기"
-export function useLessons({ teach, learn, sido }) {
+export function useLessons({ teach, learn, sido, mode }) {
   const [lessons, setLessons] = useState([])
   const [next, setNext] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -12,7 +12,7 @@ export function useLessons({ teach, learn, sido }) {
     let cancelled = false
     setLoading(true)
     setError(null)
-    listLessons({ teach, learn, sido })
+    listLessons({ teach, learn, sido, mode })
       .then((page) => {
         if (cancelled) return
         setLessons(page.lessons)
@@ -23,13 +23,13 @@ export function useLessons({ teach, learn, sido }) {
     return () => {
       cancelled = true
     }
-  }, [teach, learn, sido])
+  }, [teach, learn, sido, mode])
 
   const loadMore = useCallback(async () => {
     if (next == null) return
     setLoading(true)
     try {
-      const page = await listLessons({ teach, learn, sido }, next)
+      const page = await listLessons({ teach, learn, sido, mode }, next)
       setLessons((prev) => [...prev, ...page.lessons])
       setNext(page.next)
     } catch (e) {
@@ -37,7 +37,7 @@ export function useLessons({ teach, learn, sido }) {
     } finally {
       setLoading(false)
     }
-  }, [teach, learn, sido, next])
+  }, [teach, learn, sido, mode, next])
 
   return { lessons, loading, error, hasMore: next != null, loadMore }
 }

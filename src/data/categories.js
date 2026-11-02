@@ -61,10 +61,10 @@ export const isCategory = (code) => BY_CODE.has(code)
 export const categoryName = (code) => BY_CODE.get(code)?.name ?? `분류 ${code}`
 export const categoryGroup = (code) => BY_CODE.get(code)?.group ?? 'etc'
 
-// 시/도. 빈 문자열('')은 "지정 안 함"(예전 글 이전분 포함)입니다.
-// firestore.rules 의 SIDO 목록과 같아야 합니다.
+// 시/도. 빈 문자열('')은 "지정 안 함"(예전 글 이전분 포함)입니다. 온라인 여부는 수업 방식(online/offline)으로 따로 저장합니다.
+// firestore.rules 의 isSido 목록과 같아야 합니다.
 export const SIDO = [
-  '온라인', '서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종',
+  '서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종',
   '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주', '해외',
 ]
 

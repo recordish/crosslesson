@@ -10,11 +10,23 @@ service cloud.firestore {
 
     // src/data/categories.js 의 SIDO 와 같아야 합니다 ('' = 지정 안 함)
     function isSido(v) {
-      return v in ['', '온라인', '서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종',
+      return v in ['', '서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종',
                    '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주', '해외'];
     }
     function isAge(v) { return v == null || (v is int && v >= 10 && v <= 99); }
     function isCategory(v) { return v is int && v >= 100 && v <= 999; }
+    // src/data/lessonOptions.js 와 같아야 합니다
+    function isLearns(v) {
+      return v is list && v.size() >= 1 && v.size() <= 3 && v.toSet().size() == v.size()
+        && isCategory(v[0])
+        && (v.size() < 2 || isCategory(v[1]))
+        && (v.size() < 3 || isCategory(v[2]));
+    }
+    function isSubset(v, allowed) { return v is list && v.size() <= allowed.size() && v.toSet().size() == v.size() && v.toSet().hasOnly(allowed); }
+    function isDays(v) { return isSubset(v, ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']); }
+    function isTimeSlots(v) { return isSubset(v, ['morning', 'afternoon', 'evening']); }
+    function isTeachLevel(v) { return v in ['', 'hobby', 'skilled', 'pro']; }
+    function isLearnLevel(v) { return v in ['', 'beginner', 'basic', 'intermediate']; }
 
     // ---------- 회원 프로필 ----------
     // 누구나 읽을 수 있고(닉네임·소개), 본인만 씁니다.
@@ -46,10 +58,18 @@ service cloud.firestore {
     // ---------- 레슨: lessons/{no} ----------
     match /lessons/{lessonId} {
       function counterPath() { return /databases/$(database)/documents/counters/lessons; }
+      function lessonKeys() {
+        return ['no', 'uid', 'authorName', 'teach', 'learns', 'teachLevel', 'learnLevel',
+                'online', 'offline', 'sido', 'region', 'days', 'timeSlots', 'ageMin', 'ageMax',
+                'content', 'closed', 'views', 'createdAt', 'updatedAt'];
+      }
       function editable(d) {
-        return isCategory(d.teach) && isCategory(d.learn)
-          && isSido(d.sido)
+        return isCategory(d.teach) && isLearns(d.learns)
+          && isTeachLevel(d.teachLevel) && isLearnLevel(d.learnLevel)
+          && d.online is bool && d.offline is bool && (d.online || d.offline)
+          && isSido(d.sido) && (d.offline || d.sido == '')
           && isStr(d.region, 0, 40)
+          && isDays(d.days) && isTimeSlots(d.timeSlots)
           && isAge(d.ageMin) && isAge(d.ageMax)
           && (d.ageMin == null || d.ageMax == null || d.ageMin <= d.ageMax)
           && isStr(d.content, 10, 3000)
@@ -62,8 +82,7 @@ service cloud.firestore {
 
       // 번호(no)는 카운터 다음 번호여야 하고, 같은 트랜잭션에서 카운터가 그 번호로 바뀌어야 합니다.
       allow create: if signedIn()
-        && request.resource.data.keys().hasOnly(['no', 'uid', 'authorName', 'teach', 'learn', 'sido', 'region',
-             'ageMin', 'ageMax', 'content', 'closed', 'views', 'createdAt', 'updatedAt'])
+        && request.resource.data.keys().hasOnly(lessonKeys())
         && request.resource.data.uid == me()
         && request.resource.data.no == int(lessonId)
         && request.resource.data.no == (exists(counterPath()) ? get(counterPath()).data.last + 1 : 1)
@@ -75,7 +94,7 @@ service cloud.firestore {
       // 작성자 수정: 번호·작성자·조회수·작성일은 못 바꿉니다.
       allow update: if signedIn() && resource.data.uid == me()
         && !changed().hasAny(['no', 'uid', 'views', 'createdAt'])
-        && request.resource.data.keys().hasOnly(resource.data.keys().concat(['ageMin', 'ageMax']))
+        && request.resource.data.keys().hasOnly(lessonKeys())
         && editable(request.resource.data);
 
       // 누구나 조회수만 1씩 올릴 수 있습니다.
@@ -98,7 +117,7 @@ service cloud.firestore {
         && (resource.data.applicantUid == me() || resource.data.lessonOwnerUid == me());
 
       allow create: if signedIn()
-        && request.resource.data.keys().hasOnly(['lessonNo', 'lessonOwnerUid', 'lessonTeach', 'lessonLearn',
+        && request.resource.data.keys().hasOnly(['lessonNo', 'lessonOwnerUid', 'lessonTeach', 'lessonLearns',
              'applicantUid', 'applicantName', 'message', 'status', 'reply', 'createdAt', 'updatedAt'])
         && appId == string(request.resource.data.lessonNo) + '_' + me()
         && request.resource.data.applicantUid == me()
@@ -106,7 +125,7 @@ service cloud.firestore {
         && request.resource.data.lessonOwnerUid != me()
         && lessonOf(request.resource.data.lessonNo).closed == false
         && request.resource.data.lessonTeach == lessonOf(request.resource.data.lessonNo).teach
-        && request.resource.data.lessonLearn == lessonOf(request.resource.data.lessonNo).learn
+        && request.resource.data.lessonLearns == lessonOf(request.resource.data.lessonNo).learns
         && isStr(request.resource.data.applicantName, 2, 12)
         && isStr(request.resource.data.message, 5, 1000)
         && request.resource.data.status == 'pending'

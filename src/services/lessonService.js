@@ -1,6 +1,9 @@
 // 레슨 데이터 접근 계층
 // Firestore
-//   lessons/{no}        { no, uid, authorName, teach, learn, sido, region, ageMin, ageMax,
+//   lessons/{no}        { no, uid, authorName,
+//                         teach, learns[1~3], teachLevel, learnLevel,       ← 교환할 과목과 수준
+//                         online, offline, sido, region,                     ← 수업 방식과 장소
+//                         days[], timeSlots[], ageMin, ageMax,               ← 가능한 시간, 나이대
 //                         content, closed, views, createdAt, updatedAt }
 //   counters/lessons    { last }  ← 마지막 레슨 번호. 새 레슨은 last + 1 번 (예전 번호를 이어감)
 // 로컬 모드: localDb (같은 모양)
@@ -20,6 +23,7 @@ import {
   where,
 } from 'firebase/firestore/lite'
 import { db } from '../firebase/config'
+import { DAYS, LEARN_LEVELS, MAX_LEARNS, ordered, TEACH_LEVELS, TIME_SLOTS } from '../data/lessonOptions'
 import { delay, readDb, writeDb } from './localDb'
 
 export const PAGE_SIZE = 20
@@ -32,13 +36,23 @@ const lessonRef = (no) => doc(db, 'lessons', String(no))
 const counterRef = () => doc(db, 'counters', 'lessons')
 const byNewest = (a, b) => b.no - a.no
 
-// 사용자가 고칠 수 있는 필드만 골라 냅니다.
-function pickFields(f) {
+const known = (list, v) => (list.some(([x]) => x === v) ? v : '')
+
+// 사용자가 고칠 수 있는 필드만 골라 정리합니다. (firestore.rules 의 editable() 과 같은 모양)
+// 장소는 만나서 하는 레슨일 때만 시/도를 남깁니다.
+export function pickFields(f) {
+  const offline = Boolean(f.offline)
   return {
     teach: f.teach,
-    learn: f.learn,
-    sido: f.sido,
+    learns: [...new Set(f.learns)].slice(0, MAX_LEARNS),
+    teachLevel: known(TEACH_LEVELS, f.teachLevel),
+    learnLevel: known(LEARN_LEVELS, f.learnLevel),
+    online: Boolean(f.online),
+    offline,
+    sido: offline ? f.sido : '',
     region: f.region.trim(),
+    days: ordered(DAYS, f.days),
+    timeSlots: ordered(TIME_SLOTS, f.timeSlots),
     ageMin: f.ageMin,
     ageMax: f.ageMax,
     content: f.content.trim(),
@@ -47,17 +61,25 @@ function pickFields(f) {
 }
 
 const matches = (l, f) =>
-  (!f.teach || l.teach === f.teach) && (!f.learn || l.learn === f.learn) && (!f.sido || l.sido === f.sido)
+  (!f.teach || l.teach === f.teach) &&
+  (!f.learn || l.learns.includes(f.learn)) &&
+  (!f.sido || l.sido === f.sido) &&
+  (!f.mode || l[f.mode] === true)
 
 // 레슨 목록을 최신 번호순으로 PAGE_SIZE 개씩 가져옵니다.
-// filters: { teach, learn, sido } (없으면 전체)
+// filters: { teach, learn, sido, mode } (없으면 전체)
+//   teach: 이 과목을 가르쳐 주는 레슨 (= 내가 배울 수 있음)
+//   learn: 이 과목을 배우고 싶어 하는 레슨 (= 내가 가르쳐 줄 수 있음)
+//   mode:  'online' | 'offline'  ("둘 다" 레슨은 양쪽에 모두 나옵니다)
+// 필터 조합마다 복합 색인이 필요합니다 → firestore.indexes.json (scripts/gen-indexes.mjs 로 생성)
 // 반환: { lessons, next }  next 가 null 이면 마지막 페이지
 export async function listLessons(filters = {}, cursor = null) {
   if (db) {
     const parts = []
     if (filters.teach) parts.push(where('teach', '==', filters.teach))
-    if (filters.learn) parts.push(where('learn', '==', filters.learn))
+    if (filters.learn) parts.push(where('learns', 'array-contains', filters.learn))
     if (filters.sido) parts.push(where('sido', '==', filters.sido))
+    if (filters.mode) parts.push(where(filters.mode, '==', true))
     parts.push(orderBy('no', 'desc'))
     if (cursor) parts.push(startAfter(cursor))
     parts.push(limit(PAGE_SIZE + 1))

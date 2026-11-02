@@ -29,7 +29,7 @@ export default function ApplicationItem({ app, role, now, showLesson = true, onC
         {showLesson && (
           <Link to={`/lesson/${app.lessonNo}`} className="app-lesson">
             <span className="muted">#{app.lessonNo}</span>
-            <ExchangeBadges teach={app.lessonTeach} learn={app.lessonLearn} />
+            <ExchangeBadges teach={app.lessonTeach} learns={app.lessonLearns} />
           </Link>
         )}
         <span className={`status s-${app.status}`}>{STATUS_LABEL[app.status]}</span>

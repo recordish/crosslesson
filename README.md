@@ -5,8 +5,11 @@
 
 ## 기능
 
-- **레슨 찾기**: 배우고 싶은 과목, 가르쳐 줄 수 있는 과목, 지역으로 거르기. 최신순 20개씩 "더 보기"
+- **레슨 찾기**: 배우고 싶은 과목, 가르쳐 줄 수 있는 과목, 수업 방식(만나서/온라인), 지역으로 거르기. 최신순 20개씩 "더 보기"
 - **레슨 등록 · 수정 · 삭제 · 모집 완료**: 레슨 번호는 예전 번호를 이어서 붙습니다 (#5859부터)
+  - 과목은 분야 → 과목 2단계 버튼으로 고르고, 배우고 싶은 과목은 3개까지
+  - 실력·수준, 수업 방식(만나서/온라인/둘 다), 가능한 요일·시간대, 나이대
+  - 칸마다 바로 보이는 오류 안내, 연락처 노출 경고, 예시 넣기, "이렇게 보여요" 미리보기, 임시 저장
 - **신청**: 레슨 하나에 한 번. 작성자만 내용을 봅니다. 작성자는 수락/거절하고 답장을 남깁니다
 - **내 활동**: 내 레슨, 받은 신청, 보낸 신청
 - **로그인**: Google 로그인만 씁니다. 첫 로그인 때 닉네임을 정합니다
@@ -38,12 +41,14 @@ Firebase 설정값(`.env.local`)이 없으면 **로컬 모드**로 동작합니�
 ├── public/
 │   └── favicon.svg
 ├── firestore.rules                # Firestore 보안 규칙
-├── firestore.indexes.json         # 필터 + 최신순 정렬용 복합 색인 7개
+├── firestore.indexes.json         # 필터 + 최신순 정렬용 복합 색인 23개 (scripts/gen-indexes.mjs 로 생성)
 ├── firebase.json                  # Firebase CLI (Hosting 설정·리다이렉트, 규칙/색인, 에뮬레이터)
+├── scripts/gen-indexes.mjs        # firestore.indexes.json 생성
 ├── scripts/migrate/               # 예전 MySQL 데이터 → Firebase 이전 스크립트
 ├── tests/rules/                   # 보안 규칙 테스트 (에뮬레이터)
 └── src/
     ├── data/categories.js         # 과목 코드표(예전 번호 체계), 시/도 목록
+    ├── data/lessonOptions.js      # 수업 방식, 요일·시간대, 실력·수준 선택지와 표시 문구
     ├── firebase/config.js         # Firebase 초기화 (설정 없으면 로컬 모드)
     ├── services/                  # 데이터 계층: Firestore 또는 localStorage
     │   ├── lessonService.js       #   레슨 목록/상세/등록(번호 트랜잭션)/수정/조회수
@@ -62,14 +67,18 @@ Firebase 설정값(`.env.local`)이 없으면 **로컬 모드**로 동작합니�
 | 경로 | 내용 | 읽기 / 쓰기 |
 | --- | --- | --- |
 | `users/{uid}` | `{ nickname, intro, createdAt, updatedAt }` | 누구나 / 본인 |
-| `lessons/{no}` | `{ no, uid, authorName, teach, learn, sido, region, ageMin, ageMax, content, closed, views, createdAt, updatedAt }` | 누구나 / 작성자 (조회수 +1은 누구나) |
+| `lessons/{no}` | `{ no, uid, authorName, teach, learns[1~3], teachLevel, learnLevel, online, offline, sido, region, days[], timeSlots[], ageMin, ageMax, content, closed, views, createdAt, updatedAt }` | 누구나 / 작성자 (조회수 +1은 누구나) |
 | `counters/lessons` | `{ last }` 마지막 레슨 번호 | 누구나 / 레슨 만들 때 +1 |
-| `applications/{no}_{uid}` | `{ lessonNo, lessonOwnerUid, lessonTeach, lessonLearn, applicantUid, applicantName, message, status, reply, createdAt, updatedAt }` | 신청자·작성자 / 신청자(신청·취소), 작성자(수락·거절·답장) |
+| `applications/{no}_{uid}` | `{ lessonNo, lessonOwnerUid, lessonTeach, lessonLearns, applicantUid, applicantName, message, status, reply, createdAt, updatedAt }` | 신청자·작성자 / 신청자(신청·취소), 작성자(수락·거절·답장) |
 
-- 과목 코드(`teach`, `learn`)는 예전 사이트 번호를 그대로 씁니다 (101 영어, 204 바이올린, 306 영상, 402 프로그래밍, 601 수영 …).
+- 선택지 값은 `src/data/lessonOptions.js`에 있습니다
+  (수업 방식 `online`/`offline` 둘 다 참 = 둘 다, 요일 `mon`~`sun`, 시간대 `morning`/`afternoon`/`evening`,
+  실력 `hobby`/`skilled`/`pro`, 수준 `beginner`/`basic`/`intermediate`, 빈 값 = 선택 안 함)
+- 과목 코드(`teach`, `learns`)는 예전 사이트 번호를 그대로 씁니다 (101 영어, 204 바이올린, 306 영상, 402 프로그래밍, 601 수영 …).
   **나머지 과목 이름은 예전 DB의 분류표와 대조해서 `src/data/categories.js`를 고쳐야 합니다.**
 - 보안 규칙이 필드 종류와 길이, 작성자, 레슨 번호 순서, 중복 신청, 자기 레슨 신청, 모집 완료 레슨 신청을 서버에서 검사합니다.
-  테스트: `cd tests/rules && npm install && npm test` (Java 필요, 42개 항목)
+  테스트: `cd tests/rules && npm install && npm test` (Java 필요, 55개 항목)
+- 목록 필터 조합마다 복합 색인이 필요합니다(23개). 필터를 바꾸면 `node scripts/gen-indexes.mjs`로 다시 만드세요
 
 ## Firebase 설정 (처음 한 번)
 

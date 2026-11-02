@@ -4,6 +4,7 @@ import ApplicationItem from '../components/ApplicationItem'
 import { ExchangeBadges } from '../components/CategoryBadge'
 import { useAuth } from '../contexts/AuthContext'
 import { ageLabel, categoryName } from '../data/categories'
+import { LEARN_LEVELS, levelLabel, modeLabel, scheduleLabel, TEACH_LEVELS } from '../data/lessonOptions'
 import { useNow } from '../hooks/useNow'
 import { useTitle } from '../hooks/useTitle'
 import {
@@ -27,7 +28,7 @@ export default function LessonPage() {
   const [lesson, setLesson] = useState(undefined) // undefined: 불러오는 중, null: 없음
   const [author, setAuthor] = useState(null)
 
-  useTitle(lesson ? `${categoryName(lesson.teach)} ⇄ ${categoryName(lesson.learn)} 교환` : '레슨')
+  useTitle(lesson ? `${categoryName(lesson.teach)} ⇄ ${lesson.learns.map(categoryName).join(', ')} 교환` : '레슨')
 
   const reload = useCallback(() => getLesson(no).then(setLesson), [no])
 
@@ -61,7 +62,9 @@ export default function LessonPage() {
   }
 
   const isOwner = user?.uid === lesson.uid
-  const place = [lesson.sido, lesson.region].filter(Boolean).join(' · ')
+  const place = lesson.offline ? [lesson.sido, lesson.region].filter(Boolean).join(' · ') || '협의' : lesson.region
+  const teachLevel = levelLabel(TEACH_LEVELS, lesson.teachLevel)
+  const learnLevel = levelLabel(LEARN_LEVELS, lesson.learnLevel)
 
   async function onToggleClosed() {
     await setLessonClosed(no, !lesson.closed)
@@ -78,12 +81,20 @@ export default function LessonPage() {
     <article className="lesson">
       <p className="crumb"><Link to="/">레슨 찾기</Link> › #{lesson.no}</p>
       <div className="lesson-head">
-        <ExchangeBadges teach={lesson.teach} learn={lesson.learn} />
+        <ExchangeBadges teach={lesson.teach} learns={lesson.learns} />
         {lesson.closed && <span className="tag">모집 완료</span>}
       </div>
+      {(teachLevel || learnLevel) && (
+        <p className="levels">
+          {teachLevel && <span>가르칠 과목 실력: <strong>{teachLevel}</strong></span>}
+          {learnLevel && <span>배울 과목 지금 수준: <strong>{learnLevel}</strong></span>}
+        </p>
+      )}
 
       <dl className="lesson-info">
-        <div><dt>지역</dt><dd>{place || '협의'}</dd></div>
+        <div><dt>수업 방식</dt><dd>{modeLabel(lesson)}</dd></div>
+        <div><dt>{lesson.offline ? '지역 · 장소' : '방법'}</dt><dd>{place || '협의'}</dd></div>
+        <div><dt>가능한 시간</dt><dd>{scheduleLabel(lesson.days, lesson.timeSlots)}</dd></div>
         <div><dt>나이대</dt><dd>{ageLabel(lesson.ageMin, lesson.ageMax)}</dd></div>
         <div>
           <dt>등록</dt>

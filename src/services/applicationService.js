@@ -1,6 +1,6 @@
 // 레슨 신청 (교환 제안)
 // applications/{lessonNo}_{applicantUid}
-//   { lessonNo, lessonOwnerUid, lessonTeach, lessonLearn, applicantUid, applicantName,
+//   { lessonNo, lessonOwnerUid, lessonTeach, lessonLearns, applicantUid, applicantName,
 //     message, status: 'pending' | 'accepted' | 'rejected', reply, createdAt, updatedAt }
 // - 한 사람은 레슨 하나에 한 번만 신청할 수 있습니다 (문서 id 로 보장)
 // - 신청자와 레슨 작성자만 볼 수 있습니다
@@ -36,7 +36,7 @@ export async function apply(user, profile, lesson, message) {
     lessonNo: lesson.no,
     lessonOwnerUid: lesson.uid,
     lessonTeach: lesson.teach,
-    lessonLearn: lesson.learn,
+    lessonLearns: lesson.learns,
     applicantUid: user.uid,
     applicantName: profile.nickname,
     message: message.trim(),

@@ -33,14 +33,20 @@
 `data/lessons.json`
 ```json
 [{ "no": 5858, "legacyUserId": 123, "authorName": "글로리", "teach": 204, "learn": 306,
-   "region": "오리역", "sido": "", "ageMin": 20, "ageMax": 45, "content": "...",
-   "views": 2426, "createdAt": "2025-04-16 10:00:00", "closed": false }]
+   "region": "오리역", "sido": "", "days": "Tuesday, Wednesday", "ageMin": 20, "ageMax": 45,
+   "content": "...", "views": 2426, "createdAt": "2025-04-16 10:00:00", "closed": false }]
 ```
 
 - 새 uid는 `legacy-{예전 회원번호}`입니다. 그래서 레슨 작성자가 그대로 이어지고, 회원이 로그인하면 자기 레슨을 수정할 수 있습니다.
 - 레슨 번호는 그대로 유지되고, 끝나면 `counters/lessons`가 가장 큰 번호로 맞춰집니다.
 - 날짜 문자열은 한국 시간으로 읽습니다. 초 단위 유닉스 시간도 받습니다.
 - 보안 규칙을 벗어나는 값(나이 범위, 글자 수, 닉네임 길이, 시/도 이름)은 규칙에 맞게 다듬고 경고로 알려 줍니다.
+- 새 사이트에만 있는 항목은 이렇게 채웁니다.
+  - 배우고 싶은 과목(`learns`): 예전 `learn` 하나를 목록으로. 여러 개가 있으면 `"learns": [306, 402]`처럼 넣어도 됩니다 (최대 3개)
+  - 수업 방식(`online`/`offline`): `mode`가 있으면 그대로, 없으면 장소에 "온라인·화상·줌·전화" 같은 말이 있으면 온라인, 소개 글에만 있으면 둘 다, 아니면 만나서
+  - 시/도(`sido`): 비어 있으면 장소 글에서 "부산", "서울" 같은 시/도 이름을 찾아 넣습니다
+  - 요일(`days`): 예전 요일 항목(`Monday, Thursday` / `월,목` / `평일`)을 옮깁니다. 시간대(`timeSlots`)는 비워 둡니다 ("시간 협의"로 보임)
+  - 실력·수준(`teachLevel`, `learnLevel`): 비워 둡니다 (선택 안 함)
 
 ## 로그인 (Google만)
 
