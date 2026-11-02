@@ -279,8 +279,6 @@ textarea[aria-invalid='true'], input[aria-invalid='true'] { border-color: var(--
 .chip-sep { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
 .picker { display: flex; flex-direction: column; gap: 10px; border-radius: 10px; }
 .picker:focus { outline: none; }
-.picker.invalid { box-shadow: 0 0 0 2px var(--danger); padding: 8px; }
-.picker .items { padding: 10px; background: var(--bg); border-radius: 10px; }
 .picked { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .cat-empty { border: 1.5px dashed var(--border); color: var(--muted); font-weight: 600; }
 .mode { font-weight: 700; color: var(--text); }
@@ -296,4 +294,28 @@ textarea[aria-invalid='true'], input[aria-invalid='true'] { border-color: var(--
   .form-section { padding: 14px 12px; }
   .form-actions .actions { flex-wrap: nowrap; }
   .form-actions .actions > * { flex: 1; }
+}
+
+/* ---------- 교환할 재능: 가르칠 / 배울 칸 ---------- */
+.talent-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: start; }
+.talent-card { border: 1.5px solid var(--primary); border-radius: var(--radius); overflow: hidden; background: var(--card); min-width: 0; }
+.talent-card.invalid { border-color: var(--danger); box-shadow: 0 0 0 2px color-mix(in srgb, var(--danger) 25%, transparent); }
+.talent-head { padding: 10px 14px; font-size: 15px; font-weight: 800; }
+.talent-card.teach .talent-head { background: var(--primary); color: #fff; }
+.talent-card.teach .talent-head .req { color: #fff; }
+.talent-card.learn .talent-head { color: var(--primary-text); border-bottom: 1px solid var(--border); background: var(--primary-soft); }
+.head-note { font-size: 12px; font-weight: 600; opacity: 0.8; margin-left: 4px; }
+.talent-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.talent-swap { align-self: center; font-size: 22px; font-weight: 800; color: var(--muted); }
+.talent-level { margin-top: 4px; padding-top: 12px; border-top: 1px dashed var(--border); }
+.mini-label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.02em; }
+.picker .items-box { padding: 10px; background: var(--bg); border-radius: 10px; }
+.picker .items-box .chips.items { padding: 0; background: none; }
+.picker-foot { text-align: right; margin-top: -4px; }
+.picked-summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: 10px; background: var(--bg); font-size: 16px; }
+.picked-summary .path strong { font-size: 17px; }
+.chip.add { border-style: dashed; color: var(--primary-text); }
+@media (max-width: 760px) {
+  .talent-grid { grid-template-columns: 1fr; gap: 6px; }
+  .talent-swap { justify-self: center; transform: rotate(90deg); line-height: 1; }
 }

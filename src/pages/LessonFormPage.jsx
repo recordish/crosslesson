@@ -248,47 +248,58 @@ export default function LessonFormPage() {
         </div>
       )}
 
-      {/* ① 교환할 재능 */}
+      {/* ① 교환할 재능: 가르칠 과목 / 배울 과목을 칸 두 개로 */}
       <fieldset className="form-section">
         <legend><span className="step">1</span> 교환할 재능</legend>
 
-        <div className="field">
-          <span className="label" id="label-teach">가르쳐 줄 수 있어요 <span className="req">*</span></span>
-          <CategoryPicker
-            id="field-teach"
-            value={form.teach ? [form.teach] : []}
-            onChange={(v) => set('teach')(v[0] ?? 0)}
-            invalid={Boolean(errors.teach)}
-            describedBy="label-teach error-teach"
-          />
-          <FieldError id="error-teach" message={errors.teach} />
-          <div className="sub-field">
-            <span className="label small">이 과목 내 실력 (선택)</span>
-            <ChipGroup label="가르칠 과목 실력" options={TEACH_LEVELS} value={form.teachLevel} onChange={set('teachLevel')} />
+        <div className="talent-grid">
+          <div className={`talent-card teach${errors.teach ? ' invalid' : ''}`}>
+            <div className="talent-head" id="label-teach">가르쳐 줄 수 있어요 <span className="req">*</span></div>
+            <div className="talent-body">
+              <CategoryPicker
+                id="field-teach"
+                value={form.teach ? [form.teach] : []}
+                onChange={(v) => set('teach')(v[0] ?? 0)}
+                describedBy="label-teach error-teach"
+              />
+              <FieldError id="error-teach" message={errors.teach} />
+              {form.teach > 0 && (
+                <div className="talent-level">
+                  <span className="mini-label">이 과목 내 실력 (선택)</span>
+                  <ChipGroup label="가르칠 과목 실력" options={TEACH_LEVELS} value={form.teachLevel} onChange={set('teachLevel')} />
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="talent-swap" aria-hidden="true">⇄</div>
+
+          <div className={`talent-card learn${errors.learns ? ' invalid' : ''}`}>
+            <div className="talent-head" id="label-learns">
+              배우고 싶어요 <span className="req">*</span> <span className="head-note">최대 {MAX_LEARNS}개</span>
+            </div>
+            <div className="talent-body">
+              <CategoryPicker
+                id="field-learns"
+                value={form.learns}
+                onChange={set('learns')}
+                max={MAX_LEARNS}
+                describedBy="label-learns error-learns"
+              />
+              <FieldError id="error-learns" message={errors.learns} />
+              {form.learns.length > 0 && (
+                <div className="talent-level">
+                  <span className="mini-label">배울 과목 지금 내 수준 (선택)</span>
+                  <ChipGroup label="배울 과목 수준" options={LEARN_LEVELS} value={form.learnLevel} onChange={set('learnLevel')} />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="field">
-          <span className="label" id="label-learns">
-            배우고 싶어요 <span className="req">*</span> <span className="muted small">최대 {MAX_LEARNS}개</span>
-          </span>
-          <CategoryPicker
-            id="field-learns"
-            value={form.learns}
-            onChange={set('learns')}
-            max={MAX_LEARNS}
-            invalid={Boolean(errors.learns)}
-            describedBy="label-learns error-learns"
-          />
-          <FieldError id="error-learns" message={errors.learns} />
-          {sameSubject && (
-            <p className="field-warn">가르칠 과목과 배울 과목이 같아요 (<strong>{categoryName(form.teach)}</strong>). 맞나요?</p>
-          )}
-          <div className="sub-field">
-            <span className="label small">배울 과목 지금 내 수준 (선택)</span>
-            <ChipGroup label="배울 과목 수준" options={LEARN_LEVELS} value={form.learnLevel} onChange={set('learnLevel')} />
-          </div>
-        </div>
+        {sameSubject && (
+          <p className="field-warn">가르칠 과목과 배울 과목이 같아요 (<strong>{categoryName(form.teach)}</strong>). 맞나요?</p>
+        )}
       </fieldset>
 
       {/* ② 만나는 방법 */}
