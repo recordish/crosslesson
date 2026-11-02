@@ -37,3 +37,6 @@ scripts/migrate/service-account*.json
 *.keystore
 *.jks
 android/keystore.properties
+
+# 빌드한 앱 파일 (스토어 업로드용, 커밋하지 않음)
+release/

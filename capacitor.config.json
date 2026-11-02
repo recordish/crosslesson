@@ -7,10 +7,12 @@
   },
   "plugins": {
     "SocialLogin": {
-      "google": true,
-      "apple": false,
-      "facebook": false,
-      "twitter": false
+      "providers": {
+        "google": true,
+        "facebook": false,
+        "apple": false,
+        "twitter": false
+      }
     }
   }
 }
