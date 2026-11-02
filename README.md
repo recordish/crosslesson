@@ -125,7 +125,8 @@ npx firebase-tools deploy --only hosting --project <프로젝트ID>
 
 ## 다음에 할 일
 
-- [ ] 회원·레슨 데이터 이전, 개인정보처리방침에 국외 이전(Google Firebase) 고지
+- [x] 레슨 2,645개, Gmail 회원 546명 이전 (scripts/migrate/README.md 진행 기록)
+- [ ] 개인정보처리방침에 국외 이전(Google Firebase) 고지
 - [ ] 레슨 상세 페이지 검색 노출(프리렌더링), sitemap.xml
 - [ ] 카카오 로그인 (서버 함수가 필요해 Firebase Blaze 요금제 필요)
 - [ ] 신청 알림 (이메일 또는 카카오 알림톡)

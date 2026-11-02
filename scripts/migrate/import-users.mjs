@@ -13,6 +13,10 @@
 // Gmail 이 아닌 주소(네이버, 다음 등)로 가입했던 회원은 Google 로그인으로 이어지지 않습니다.
 // 프로필과 레슨은 그대로 옮겨지고, 원하면 나중에 관리자가 새 계정으로 옮겨 줄 수 있습니다.
 //
+// 지금 설정: Google 로그인만 쓰므로 Gmail 회원만 옮깁니다 (data/users.json 을 만들 때 Gmail 만 남김).
+//   Gmail 이 아닌 회원의 계정·이메일은 저장하지 않습니다. 그 회원들의 예전 글은 읽기 전용으로 남습니다.
+// Auth 에뮬레이터에서 확인함: 같은 Gmail 로 Google 로그인하면 미리 만든 legacy-… 계정에 이어지고 uid 도 그대로입니다.
+//
 // 실행: GOOGLE_APPLICATION_CREDENTIALS=./service-account.json node import-users.mjs [--dry-run]
 import { auth, db, DRY_RUN, readJson, toMillis } from './admin.mjs'
 
@@ -45,7 +49,7 @@ for (let i = 0; i < authUsers.length && !DRY_RUN; i += 1000) {
   const chunk = authUsers.slice(i, i + 1000)
   const result = await auth.importUsers(chunk)
   failed += result.failureCount
-  result.errors.forEach((e) => console.warn(`  ✗ ${chunk[e.index].email}: ${e.error.message}`))
+  result.errors.forEach((e) => console.warn(`  ✗ 회원 ${chunk[e.index].uid}: ${e.error.message}`)) // 이메일은 기록에 남기지 않음
 }
 
 // 2) 프로필 문서 (400개씩 batch). 이메일이 없는 회원도 레슨 작성자 이름을 위해 만듭니다.
