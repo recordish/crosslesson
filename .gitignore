@@ -32,3 +32,8 @@ dist-ssr
 .firebase/
 scripts/migrate/data/
 scripts/migrate/service-account*.json
+
+# 앱 서명 키는 절대 커밋하지 않습니다
+*.keystore
+*.jks
+android/keystore.properties
