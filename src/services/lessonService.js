@@ -31,6 +31,32 @@ export const CONTENT_MIN = 10
 export const CONTENT_MAX = 3000
 export const REGION_MAX = 40
 
+// 저장된 레슨을 화면에서 쓰는 모양으로 맞춥니다.
+// 예전 모양(learn 하나, online/offline·요일 없음)으로 저장된 글도 깨지지 않게 기본값을 채웁니다.
+export function normalizeLesson(l) {
+  if (!l) return l
+  const learns = Array.isArray(l.learns) ? l.learns : l.learn ? [l.learn] : []
+  const hasMode = typeof l.online === 'boolean' || typeof l.offline === 'boolean'
+  return {
+    teachLevel: '',
+    learnLevel: '',
+    region: '',
+    sido: '',
+    ageMin: null,
+    ageMax: null,
+    closed: false,
+    views: 0,
+    content: '',
+    ...l,
+    teach: l.teach || null,
+    learns,
+    online: hasMode ? Boolean(l.online) : false,
+    offline: hasMode ? Boolean(l.offline) : true,
+    days: Array.isArray(l.days) ? l.days : [],
+    timeSlots: Array.isArray(l.timeSlots) ? l.timeSlots : [],
+  }
+}
+
 const lessonsCol = () => collection(db, 'lessons')
 const lessonRef = (no) => doc(db, 'lessons', String(no))
 const counterRef = () => doc(db, 'counters', 'lessons')
@@ -86,11 +112,11 @@ export async function listLessons(filters = {}, cursor = null) {
     const snap = await getDocs(query(lessonsCol(), ...parts))
     const docs = snap.docs.slice(0, PAGE_SIZE)
     return {
-      lessons: docs.map((d) => d.data()),
+      lessons: docs.map((d) => normalizeLesson(d.data())),
       next: snap.docs.length > PAGE_SIZE ? docs[docs.length - 1] : null,
     }
   }
-  const all = Object.values(readDb().lessons).filter((l) => matches(l, filters)).sort(byNewest)
+  const all = Object.values(readDb().lessons).map(normalizeLesson).filter((l) => matches(l, filters)).sort(byNewest)
   const start = cursor ?? 0
   return delay({
     lessons: all.slice(start, start + PAGE_SIZE),
@@ -101,17 +127,17 @@ export async function listLessons(filters = {}, cursor = null) {
 export async function getLesson(no) {
   if (db) {
     const snap = await getDoc(lessonRef(no))
-    return snap.exists() ? snap.data() : null
+    return snap.exists() ? normalizeLesson(snap.data()) : null
   }
-  return delay(readDb().lessons[no] ?? null)
+  return delay(normalizeLesson(readDb().lessons[no] ?? null))
 }
 
 export async function getLessonsByUser(uid) {
   if (db) {
     const snap = await getDocs(query(lessonsCol(), where('uid', '==', uid)))
-    return snap.docs.map((d) => d.data()).sort(byNewest)
+    return snap.docs.map((d) => normalizeLesson(d.data())).sort(byNewest)
   }
-  return delay(Object.values(readDb().lessons).filter((l) => l.uid === uid).sort(byNewest))
+  return delay(Object.values(readDb().lessons).filter((l) => l.uid === uid).map(normalizeLesson).sort(byNewest))
 }
 
 // 새 레슨을 만들고 번호를 돌려줍니다. 번호는 counters/lessons 를 1 늘려서 정합니다.

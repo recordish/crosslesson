@@ -1,4 +1,5 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
+import ErrorBoundary from './components/ErrorBoundary'
 import Footer from './components/Footer'
 import Header from './components/Header'
 import LegacyRedirect from './components/LegacyRedirect'
@@ -23,6 +24,7 @@ export default function App() {
         <ScrollToTop />
         <Header />
         <main className="container">
+          <RouteBoundary>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/lesson/:no" element={<LessonPage />} />
@@ -37,9 +39,15 @@ export default function App() {
             ))}
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
+          </RouteBoundary>
         </main>
         <Footer />
       </BrowserRouter>
     </AuthProvider>
   )
+}
+
+function RouteBoundary({ children }) {
+  const { pathname } = useLocation()
+  return <ErrorBoundary resetKey={pathname}>{children}</ErrorBoundary>
 }
