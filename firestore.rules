@@ -143,8 +143,8 @@ service cloud.firestore {
         && isStr(request.resource.data.reply, 0, 1000)
         && isTime(request.resource.data.updatedAt);
 
-      // 신청자: 취소
-      allow delete: if signedIn() && resource.data.applicantUid == me();
+      // 신청자: 취소. 레슨 작성자: 탈퇴하거나 레슨을 지울 때 받은 신청 정리
+      allow delete: if signedIn() && (resource.data.applicantUid == me() || resource.data.lessonOwnerUid == me());
     }
   }
 }

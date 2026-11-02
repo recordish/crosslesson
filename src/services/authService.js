@@ -2,7 +2,16 @@
 // - Firebase: Google 로그인만 씁니다
 // - 로컬 모드: 테스트 사용자 A/B 중 하나로 로그인 (신청 → 수락 흐름을 혼자 시험해 볼 수 있음)
 import { Capacitor } from '@capacitor/core'
-import { GoogleAuthProvider, onAuthStateChanged, signInWithCredential, signInWithPopup, signOut } from 'firebase/auth'
+import {
+  deleteUser,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  reauthenticateWithCredential,
+  reauthenticateWithPopup,
+  signInWithCredential,
+  signInWithPopup,
+  signOut,
+} from 'firebase/auth'
 import { auth } from '../firebase/config'
 
 // 안드로이드 앱 안에서는 Google 이 웹 팝업 로그인을 막아서, 휴대폰의 Google 계정 선택창으로 로그인한 뒤
@@ -61,6 +70,33 @@ export async function loginWithGoogle() {
   return signInWithPopup(auth, provider)
 }
 
+// 탈퇴 직전 본인 확인: Google 계정을 한 번 더 고르게 합니다.
+// (Firebase 는 최근에 로그인한 경우에만 계정을 지울 수 있어서, 지우기 전에 먼저 확인합니다)
+export async function reauthenticate() {
+  if (!auth) return
+  const user = auth.currentUser
+  if (isApp) {
+    const idToken = await nativeGoogleIdToken()
+    await reauthenticateWithCredential(user, GoogleAuthProvider.credential(idToken))
+    return
+  }
+  const provider = new GoogleAuthProvider()
+  provider.setCustomParameters({ prompt: 'select_account' })
+  await reauthenticateWithPopup(user, provider)
+}
+
+// 로그인 계정 자체를 지웁니다. (데이터는 accountService 가 먼저 지움)
+export async function deleteCurrentUser() {
+  if (!auth) {
+    setLocalUser(null)
+    return
+  }
+  await deleteUser(auth.currentUser)
+  if (isApp) {
+    import('@capgo/capacitor-social-login').then(({ SocialLogin }) => SocialLogin.logout({ provider: 'google' })).catch(() => {})
+  }
+}
+
 export function loginAsLocal(uid) {
   setLocalUser(uid)
 }
@@ -83,6 +119,8 @@ export function authErrorMessage(e) {
     'auth/network-request-failed': '네트워크에 연결할 수 없어요.',
     'auth/too-many-requests': '시도가 너무 많아요. 잠시 후 다시 해 주세요.',
     'auth/unauthorized-domain': '이 주소에서는 로그인할 수 없어요. 관리자에게 알려 주세요.',
+    'auth/user-mismatch': '처음 로그인한 것과 다른 Google 계정을 골랐어요. 같은 계정으로 다시 해 주세요.',
+    'auth/requires-recent-login': '본인 확인이 필요해요. 다시 시도해 주세요.',
   }
   return e?.code in messages ? messages[e.code] : 'Google 로그인 중 문제가 생겼어요. 다시 시도해 주세요.'
 }

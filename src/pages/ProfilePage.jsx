@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTitle } from '../hooks/useTitle'
 import { logout } from '../services/authService'
@@ -55,6 +55,11 @@ export default function ProfilePage() {
         <button type="button" className="link" onClick={() => logout().then(() => navigate('/'))}>로그아웃</button>
         <button type="submit" className="primary" disabled={saving || !nameOk}>{saving ? '저장 중…' : '저장'}</button>
       </div>
+      {!profile && (
+        <p className="muted small">
+          가입하면 <Link to="/privacy">개인정보처리방침</Link>에 동의하는 것으로 봅니다.
+        </p>
+      )}
     </form>
   )
 }

@@ -7,6 +7,8 @@ import ProtectedRoute from './components/ProtectedRoute'
 import ScrollToTop from './components/ScrollToTop'
 import { AuthProvider } from './contexts/AuthContext'
 import AboutPage from './pages/AboutPage'
+import DeleteAccountInfoPage from './pages/DeleteAccountInfoPage'
+import PrivacyPage from './pages/PrivacyPage'
 import HomePage from './pages/HomePage'
 import LessonFormPage from './pages/LessonFormPage'
 import LessonPage from './pages/LessonPage'
@@ -34,6 +36,8 @@ export default function App() {
             <Route path="/profile" element={<ProtectedRoute requireProfile={false}><ProfilePage /></ProtectedRoute>} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/delete-account" element={<DeleteAccountInfoPage />} />
             {['/lesson.php', '/class.php', '/learn.php'].map((p) => (
               <Route key={p} path={p} element={<LegacyRedirect />} />
             ))}

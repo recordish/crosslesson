@@ -5,6 +5,8 @@ export default function Footer() {
     <footer className="footer">
       <nav>
         <Link to="/about">크로스레슨 소개</Link>
+        <Link to="/privacy"><strong>개인정보처리방침</strong></Link>
+        <Link to="/delete-account">계정 삭제</Link>
       </nav>
       <p>© 2009–{new Date().getFullYear()} Crosslesson</p>
     </footer>

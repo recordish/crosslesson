@@ -100,8 +100,12 @@ await t('app: list all denied', assertFails(getDocs(collection(C, 'applications'
 await t('app: applicant cannot accept self', assertFails(updateDoc(doc(B, 'applications/1_userB'), { status: 'accepted', updatedAt: now + 2 })))
 await t('app: owner accepts with reply', assertSucceeds(updateDoc(doc(A, 'applications/1_userB'), { status: 'accepted', reply: '카톡 abc', updatedAt: now + 2 })))
 await t('app: owner cannot edit message', assertFails(updateDoc(doc(A, 'applications/1_userB'), { message: '바꿔치기' })))
-await t('app: owner cannot delete', assertFails(deleteDoc(doc(A, 'applications/1_userB'))))
+await t('app: stranger cannot delete', assertFails(deleteDoc(doc(C, 'applications/1_userB'))))
 await t('app: applicant cancels', assertSucceeds(deleteDoc(doc(B, 'applications/1_userB'))))
+await t('app: B re-applies', assertSucceeds(setDoc(doc(B, 'applications/1_userB'), app(1, 'userB'))))
+await t('app: lesson owner can delete received (account deletion)', assertSucceeds(deleteDoc(doc(A, 'applications/1_userB'))))
+await t('profile: own delete', assertSucceeds(deleteDoc(doc(B, 'users/userB'))))
+await t('profile: other delete denied', assertFails(deleteDoc(doc(B, 'users/userA'))))
 
 console.log(`\n${pass} passed, ${fail} failed`)
 await env.cleanup()

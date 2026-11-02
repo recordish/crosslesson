@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import ApplicationItem from '../components/ApplicationItem'
+import DeleteAccountSection from '../components/DeleteAccountSection'
 import LessonCard from '../components/LessonCard'
 import { useAuth } from '../contexts/AuthContext'
 import { useNow } from '../hooks/useNow'
@@ -103,6 +104,8 @@ export default function MyPage() {
           ))}
         </ul>
       )}
+
+      <DeleteAccountSection />
     </>
   )
 }

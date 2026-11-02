@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import GoogleSignInButton from '../components/GoogleSignInButton'
 import { useAuth } from '../contexts/AuthContext'
 import { isFirebaseConfigured } from '../firebase/config'
@@ -24,6 +24,9 @@ export default function LoginPage() {
     <section className="auth">
       <h1 className="page-title">로그인 / 회원가입</h1>
       <p className="muted">Google 계정으로 로그인해요. 처음이면 자동으로 가입돼요.</p>
+      <p className="muted small">
+        가입하면 <Link to="/privacy">개인정보처리방침</Link>에 동의하는 것으로 봅니다. 만 14세 미만은 가입할 수 없어요.
+      </p>
       {isFirebaseConfigured ? <GoogleLogin /> : <LocalLogin />}
     </section>
   )
