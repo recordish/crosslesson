@@ -29,7 +29,7 @@ export default function HomePage() {
 
   return (
     <>
-      {justDeleted && <p className="notice">탈퇴가 끝났어요. 그동안 크로스레슨을 이용해 주셔서 고마워요.</p>}
+      {justDeleted && <p className="notice">계정이 삭제됐어요. 그동안 크로스레슨을 이용해 주셔서 고마워요.</p>}
       <section className="hero">
         <h1>가르치고, 배우고.<br />재능을 맞바꿔요</h1>
         <p>내가 잘하는 것을 가르쳐 주고, 배우고 싶은 것을 배워요. 돈 대신 재능으로.</p>
