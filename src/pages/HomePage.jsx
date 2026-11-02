@@ -7,7 +7,7 @@ import { useNow } from '../hooks/useNow'
 import { useTitle } from '../hooks/useTitle'
 
 // 레슨 찾기. 필터는 주소에 남겨서(?teach=204&learn=306&sido=서울) 공유·뒤로 가기가 됩니다.
-// 예전 주소 class.php?d=204 → /?teach=204, learn.php?d=306 → /?learn=306 으로 연결됩니다(.htaccess).
+// 예전 주소 class.php?d=204 → /?teach=204, learn.php?d=306 → /?learn=306 으로 연결됩니다(LegacyRedirect).
 export default function HomePage() {
   useTitle('')
   const [params, setParams] = useSearchParams()

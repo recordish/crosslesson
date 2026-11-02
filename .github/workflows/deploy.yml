@@ -1,12 +1,10 @@
 # 푸시할 때마다 검사(lint)와 빌드를 하고,
-# main 브랜치이고 카페24 FTP 정보(Secrets)가 등록돼 있으면 카페24 웹호스팅에 올립니다.
+# main 브랜치이고 Firebase 서비스 계정(Secret)이 등록돼 있으면 Firebase Hosting 에 배포합니다.
 #
-# 사전 설정 (저장소 Settings → Secrets and variables → Actions → New repository secret)
-#   FTP_SERVER     카페24 FTP 주소 (예: crosslesson.cafe24.com)
-#   FTP_USERNAME   FTP 아이디
-#   FTP_PASSWORD   FTP 비밀번호
-#   FTP_SERVER_DIR 올릴 폴더 (보통 /www/)
-# 그리고 저장소에 .env.production (Firebase 웹 설정값)이 있어야 합니다.
+# 사전 설정
+#   1. 저장소에 .env.production (Firebase 웹 설정값) 커밋
+#   2. 저장소 Settings → Secrets and variables → Actions → New repository secret
+#        FIREBASE_SERVICE_ACCOUNT : 서비스 계정 키 JSON 전체 (README 의 "자동 배포" 참고)
 name: Build & Deploy
 
 on:
@@ -24,7 +22,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      FTP_SERVER: ${{ secrets.FTP_SERVER }}
+      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
     steps:
       - uses: actions/checkout@v5
 
@@ -39,22 +37,22 @@ jobs:
           npm run lint
           npm run build
 
-      - name: Check Firebase settings before deploy
-        if: github.ref == 'refs/heads/main' && env.FTP_SERVER != ''
+      # .env.production 의 프로젝트 ID 로 배포합니다. 없으면 로컬 모드 사이트가 올라가지 않게 멈춥니다.
+      - name: Read Firebase project ID
+        id: project
+        if: github.ref == 'refs/heads/main' && env.FIREBASE_SERVICE_ACCOUNT != ''
         run: |
-          if ! grep -q '^VITE_FIREBASE_PROJECT_ID=.\+' .env.production 2>/dev/null; then
-            echo "::error::.env.production 에 Firebase 설정값이 없습니다. 이대로 올리면 로컬 모드 사이트가 배포됩니다."
+          id=$(grep -E '^VITE_FIREBASE_PROJECT_ID=' .env.production 2>/dev/null | cut -d= -f2- | tr -d '[:space:]"')
+          if [ -z "$id" ]; then
+            echo "::error::.env.production 에 VITE_FIREBASE_PROJECT_ID 가 없습니다."
             exit 1
           fi
+          echo "id=$id" >> "$GITHUB_OUTPUT"
 
-      - name: Upload to Cafe24 (FTP)
-        if: github.ref == 'refs/heads/main' && env.FTP_SERVER != ''
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy to Firebase Hosting
+        if: github.ref == 'refs/heads/main' && env.FIREBASE_SERVICE_ACCOUNT != ''
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
-          local-dir: ./dist/
-          # 서버에 있는 예전 PHP 파일은 지우지 않습니다 (직접 백업 후 정리하세요)
-          dangerous-clean-slate: false
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ steps.project.outputs.id }}
+          channelId: live

@@ -10,7 +10,7 @@
 - **신청**: 레슨 하나에 한 번. 작성자만 내용을 봅니다. 작성자는 수락/거절하고 답장을 남깁니다
 - **내 활동**: 내 레슨, 받은 신청, 보낸 신청
 - **로그인**: Google, 이메일/비밀번호(가입, 비밀번호 재설정). 첫 로그인 때 닉네임을 정합니다
-- **예전 주소 연결**: `lesson.php?no=5858` → `/lesson/5858` 등 301 리다이렉트 (`public/.htaccess`)
+- **예전 주소 연결**: `lesson.php?no=5858` → `/lesson/5858`, `class.php?d=204` → `/?teach=204` 등 (`src/components/LegacyRedirect.jsx`, `firebase.json`)
 
 ## 실행
 
@@ -34,13 +34,12 @@ Firebase 설정값(`.env.local`)이 없으면 **로컬 모드**로 동작합니�
 ## 폴더 구조
 
 ```
-├── .github/workflows/deploy.yml   # 검사·빌드 + (main) 카페24 FTP 자동 업로드
+├── .github/workflows/deploy.yml   # 검사·빌드 + (main) Firebase Hosting 자동 배포
 ├── public/
-│   ├── .htaccess                  # 카페24(Apache): https, 예전 주소 리다이렉트, 화면 주소 처리
 │   └── favicon.svg
 ├── firestore.rules                # Firestore 보안 규칙
 ├── firestore.indexes.json         # 필터 + 최신순 정렬용 복합 색인 7개
-├── firebase.json                  # Firebase CLI (규칙/색인 배포, Hosting, 에뮬레이터)
+├── firebase.json                  # Firebase CLI (Hosting 설정·리다이렉트, 규칙/색인, 에뮬레이터)
 ├── scripts/migrate/               # 예전 MySQL 데이터 → Firebase 이전 스크립트
 ├── tests/rules/                   # 보안 규칙 테스트 (에뮬레이터)
 └── src/
@@ -74,7 +73,7 @@ Firebase 설정값(`.env.local`)이 없으면 **로컬 모드**로 동작합니�
 
 ## Firebase 설정 (처음 한 번)
 
-1. [Firebase 콘솔](https://console.firebase.google.com)에서 프로젝트 만들기 → **웹 앱 추가** → 설정값을 `.env.production`에 넣고 커밋 (`.env.example` 참고. 브라우저에 공개되는 값이라 커밋해도 됩니다)
+1. [Firebase 콘솔](https://console.firebase.google.com)에서 크로스레슨 전용 프로젝트 만들기 (메모 앱 recordish 와 별도) → **웹 앱 추가**(Firebase 호스팅도 설정 체크) → 설정값을 `.env.production`에 넣고 커밋 (`.env.example` 참고. 브라우저에 공개되는 값이라 커밋해도 됩니다)
 2. **Authentication → 로그인 방법**: Google, 이메일/비밀번호 사용 설정
 3. **Authentication → 설정 → 승인된 도메인**: `crosslesson.com` 추가
 4. **Firestore Database 만들기**: 프로덕션 모드, 위치 `asia-northeast3`(서울)
@@ -83,18 +82,33 @@ Firebase 설정값(`.env.local`)이 없으면 **로컬 모드**로 동작합니�
    npx firebase-tools deploy --only firestore:rules,firestore:indexes --project <프로젝트ID>
    ```
 
-## 카페24에 배포
+## 배포 (Firebase Hosting)
 
-**자동 (추천)**: 저장소 Secrets에 `FTP_SERVER`, `FTP_USERNAME`, `FTP_PASSWORD`, `FTP_SERVER_DIR`(보통 `/www/`)를 등록하면
-`main`에 푸시할 때마다 GitHub Actions가 빌드해서 올립니다.
+크로스레슨 전용 Firebase 프로젝트에 화면과 데이터를 함께 둡니다. 카페24 웹호스팅은 쓰지 않습니다.
 
-**수동**: `npm run build` 후 `dist/` 안의 파일 전부(숨김 파일 `.htaccess` 포함)를 FTP로 `/www/`에 올립니다.
+**자동**: 서비스 계정 키(JSON 전체)를 저장소 Secrets의 `FIREBASE_SERVICE_ACCOUNT`로 등록하면
+`main`에 푸시할 때마다 GitHub Actions가 빌드해서 배포합니다. 프로젝트 ID는 `.env.production`에서 읽습니다.
+(키는 Firebase 콘솔 → 프로젝트 설정 → 서비스 계정 → 새 비공개 키. **채팅이나 저장소에 올리지 마세요**)
 
-> ⚠️ **처음 올리기 전에** 기존 사이트 파일과 DB를 **전부 백업**하세요. 예전 `index.php`가 남아 있어도 `.htaccess`의
-> `DirectoryIndex index.html`이 새 화면을 먼저 보여 주고, 예전 PHP 주소는 새 주소로 넘어갑니다.
-> 확인이 끝나면 예전 PHP 파일은 지워 주세요 (오류 메시지로 서버 경로가 드러나던 문제도 함께 없어집니다).
+**수동**:
+```bash
+npm run build
+npx firebase-tools deploy --only hosting --project <프로젝트ID>
+```
 
-Firebase Hosting을 쓰려면: `npm run build && npx firebase-tools deploy --only hosting` (설정은 `firebase.json`에 있음).
+- 예전 주소: `/about.php`, `/index.php`는 `firebase.json`의 301 리다이렉트가,
+  `?no=`·`?d=` 값이 필요한 `lesson.php`, `class.php`, `learn.php`는 앱(`LegacyRedirect`)이 새 주소로 넘깁니다.
+  (Firebase Hosting은 물음표 뒤 값으로 서버 리다이렉트를 할 수 없습니다)
+
+### 도메인 연결 (crosslesson.com, 카페24 도메인)
+
+1. Firebase 콘솔 → Hosting → **커스텀 도메인 추가** → `crosslesson.com` 입력
+2. Firebase가 알려 주는 **TXT 레코드**(소유 확인)와 **A 레코드**를 카페24 도메인 관리의 DNS 설정에 추가하고,
+   예전 카페24 호스팅을 가리키던 A 레코드는 지웁니다. 메일을 쓰고 있다면 MX 레코드는 그대로 둡니다
+3. `www.crosslesson.com`도 추가하고 `crosslesson.com`으로 리다이렉트하도록 고릅니다
+4. Authentication → 설정 → **승인된 도메인**에 `crosslesson.com` 추가
+5. 인증서 발급까지 몇 시간 걸릴 수 있습니다. 새 사이트가 잘 뜨는지 확인한 뒤 카페24 호스팅을 해지합니다
+   (⚠️ 해지 전에 예전 DB를 반드시 내보내 두세요. 도메인은 호스팅을 해지해도 그대로 유지됩니다)
 
 ## 예전 데이터 옮기기
 
