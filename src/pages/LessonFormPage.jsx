@@ -183,7 +183,7 @@ export default function LessonFormPage() {
 
   const set = (key) => (value) => setForm((f) => ({ ...f, [key]: value }))
   const contentLength = form.content.trim().length
-  const sameSubject = form.teach && form.learns.includes(form.teach)
+  const sameSubject = Boolean(form.teach) && form.learns.includes(form.teach)
   const contactWarning = looksLikeContact(form.content)
   const showPlace = form.mode !== 'online'
 

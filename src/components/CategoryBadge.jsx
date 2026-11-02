@@ -21,7 +21,7 @@ export function ExchangeBadges({ teach, learns = [], placeholder = false }) {
   return (
     <span className="exchange">
       {teachBadge}
-      {(placeholder || (teach && learns.length > 0)) && <span className="swap" aria-label="교환">⇄</span>}
+      {(placeholder || (Boolean(teach) && learns.length > 0)) && <span className="swap" aria-label="교환">⇄</span>}
       {learnBadges}
     </span>
   )
