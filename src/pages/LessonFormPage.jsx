@@ -122,6 +122,7 @@ export default function LessonFormPage() {
       const loaded = {
         ...EMPTY,
         ...l,
+        teach: l.teach ?? 0,
         mode: modeOf(l),
         anyAge: l.ageMin == null && l.ageMax == null,
         ageMin: l.ageMin ?? '',

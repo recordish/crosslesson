@@ -39,7 +39,24 @@ function age(v, no) {
   return null
 }
 
-const ONLINE_WORDS = /온라인|화상|비대면|줌|zoom|스카이프|skype|구글\s*미트|meet|전화|카톡\s*통화|디스코드/i
+const ONLINE_WORDS = /온라인|online|화상|비대면|줌|zoom|스카이프|skype|구글\s*미트|meet|전화|카톡\s*통화|디스코드/i
+
+// 예전 글의 장소는 대부분 동네 이름이라 자주 나오는 곳을 시/도로 바꿉니다 (가장 먼저 나오는 곳 기준)
+const PLACE_SIDO = {
+  서울: ['서울', 'seoul', '강남', 'gangnam', '홍대', 'hongdae', '잠실', '사당', '종로', '신촌', '건대', '강서', '대학로', '구로',
+    '신림', '천호', '노원', '여의도', '신사', '명동', '서초', '송파', '이태원', 'itaewon', '왕십리', '영등포', '관악', '마포', '성수',
+    '합정', '선릉', '역삼', '압구정', '청담', '목동', '동대문', '용산', '광화문', '혜화', '삼성동', '교대', '양재', '수유', '미아',
+    '상봉', '망원', '연남', '을지로', '충무로', '은평', '성북', '도봉', '중랑', '강동', '금천', '동작', '양천', '광진', '서울대'],
+  경기: ['경기', '분당', '수원', '일산', '부천', '안양', '평촌', '용인', '의정부', '판교', '안산', '구리', '김포', '동탄', '남양주',
+    '성남', '고양', '화성', '광명', '하남', '시흥', '파주', '군포', '의왕', '과천', '오산', '평택', '이천', '광교', '죽전', '수지', '산본'],
+  인천: ['인천', '송도', '부평', '계양'],
+  충남: ['충남', '천안', '아산'],
+  해외: ['해외', 'paris', 'canada', 'usa', 'london', 'tokyo', 'japan', 'australia', 'overseas', 'abroad'],
+}
+const PLACE_PAIRS = [
+  ...SIDO.map((s) => [s, s]),
+  ...Object.entries(PLACE_SIDO).flatMap(([sido, words]) => words.map((w) => [w, sido])),
+]
 const DAY_NAMES = {
   mon: ['mon', 'monday', '월'], tue: ['tue', 'tuesday', '화'], wed: ['wed', 'wednesday', '수'], thu: ['thu', 'thursday', '목'],
   fri: ['fri', 'friday', '금'], sat: ['sat', 'saturday', '토'], sun: ['sun', 'sunday', '일'],
@@ -73,20 +90,27 @@ function parseMode(l, no) {
 }
 function guessSido(l) {
   if (SIDO.includes(l.sido)) return l.sido
-  const text = `${l.sido ?? ''} ${l.region ?? ''}`
-  return SIDO.find((s) => text.includes(s)) ?? ''
+  const text = `${l.sido ?? ''} ${l.region ?? ''}`.toLowerCase()
+  let best = null
+  for (const [word, sido] of PLACE_PAIRS) {
+    const at = text.indexOf(word.toLowerCase())
+    if (at >= 0 && (best === null || at < best.at)) best = { at, sido }
+  }
+  return best?.sido ?? ''
 }
 
 function normalize(l) {
   const no = Number(l.no)
   if (!Number.isInteger(no) || no < 1) throw new Error(`잘못된 번호: ${l.no}`)
-  const teach = Number(l.teach)
   const validCode = (c) => Number.isInteger(c) && c >= 100 && c <= 999
-  if (!validCode(teach)) throw new Error(`#${no} 가르칠 과목 코드가 잘못됨: ${l.teach}`)
+  // 예전 글은 가르칠 과목이나 배울 과목 한쪽이 비어 있을 수 있습니다 (둘 다 비면 건너뜀)
+  const teach = validCode(Number(l.teach)) ? Number(l.teach) : null
   const rawLearns = (Array.isArray(l.learns) ? l.learns : [l.learn]).map(Number)
   const learns = [...new Set(rawLearns.filter(validCode))].slice(0, MAX_LEARNS)
-  if (learns.length === 0) throw new Error(`#${no} 배울 과목 코드가 잘못됨: ${JSON.stringify(l.learns ?? l.learn)}`)
-  for (const c of [teach, ...learns]) {
+  if (teach == null && learns.length === 0) throw new Error(`#${no} 가르칠 과목과 배울 과목이 둘 다 없음`)
+  if (teach == null) warn(no, '가르칠 과목 없음 (배울 과목만 보임)')
+  if (learns.length === 0) warn(no, '배울 과목 없음 (가르칠 과목만 보임)')
+  for (const c of [teach, ...learns].filter(Boolean)) {
     if (!isCategory(c)) warn(no, `과목 코드 ${c} 가 src/data/categories.js 에 없음 ("분류 ${c}"로 보임)`)
   }
   let content = chars(l.content)
@@ -132,6 +156,7 @@ function normalize(l) {
   }
 }
 
+const SUMMARY_ONLY = process.argv.includes('--summary') // 경고를 한 줄씩 보이지 않고 종류별 개수만
 const docs = []
 let errors = 0
 for (const l of lessons) {
@@ -144,7 +169,16 @@ for (const l of lessons) {
 }
 const maxNo = docs.reduce((m, d) => Math.max(m, d.no), 0)
 console.log(`레슨 ${docs.length}개 준비 (건너뜀 ${errors}개), 가장 큰 번호 #${maxNo}${DRY_RUN ? ' (시험 실행: 저장 안 함)' : ''}`)
-warnings.forEach((w) => console.warn('  ⚠️', w))
+if (SUMMARY_ONLY) {
+  const kinds = {}
+  for (const w of warnings) {
+    const kind = w.replace(/^#\d+: /, '').replace(/"[^"]*"/g, '"…"').replace(/\d+/g, 'N')
+    kinds[kind] = (kinds[kind] ?? 0) + 1
+  }
+  Object.entries(kinds).sort((a, b) => b[1] - a[1]).forEach(([k, n]) => console.warn(`  ⚠️ ${n}개: ${k}`))
+} else {
+  warnings.forEach((w) => console.warn('  ⚠️', w))
+}
 
 if (!DRY_RUN) {
   for (let i = 0; i < docs.length; i += 400) {

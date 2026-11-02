@@ -16,9 +16,10 @@ service cloud.firestore {
     function isAge(v) { return v == null || (v is int && v >= 10 && v <= 99); }
     function isCategory(v) { return v is int && v >= 100 && v <= 999; }
     // src/data/lessonOptions.js 와 같아야 합니다
+    // 배울 과목 0~3개 (0개는 예전 사이트에서 옮겨 온 "가르쳐 주기만" 하는 글)
     function isLearns(v) {
-      return v is list && v.size() >= 1 && v.size() <= 3 && v.toSet().size() == v.size()
-        && isCategory(v[0])
+      return v is list && v.size() <= 3 && v.toSet().size() == v.size()
+        && (v.size() < 1 || isCategory(v[0]))
         && (v.size() < 2 || isCategory(v[1]))
         && (v.size() < 3 || isCategory(v[2]));
     }
@@ -64,7 +65,9 @@ service cloud.firestore {
                 'content', 'closed', 'views', 'createdAt', 'updatedAt'];
       }
       function editable(d) {
-        return isCategory(d.teach) && isLearns(d.learns)
+        // 가르칠 과목이 없거나(null) 배울 과목이 없는 건 예전 글뿐입니다. 둘 중 하나는 꼭 있어야 합니다.
+        return (d.teach == null || isCategory(d.teach)) && isLearns(d.learns)
+          && (d.teach != null || d.learns.size() > 0)
           && isTeachLevel(d.teachLevel) && isLearnLevel(d.learnLevel)
           && d.online is bool && d.offline is bool && (d.online || d.offline)
           && isSido(d.sido) && (d.offline || d.sido == '')

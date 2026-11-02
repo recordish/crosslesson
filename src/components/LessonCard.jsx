@@ -10,7 +10,7 @@ export default function LessonCard({ lesson, now, preview = false }) {
   const body = (
     <>
       <div className="card-top">
-        <ExchangeBadges teach={lesson.teach} learns={lesson.learns} />
+        <ExchangeBadges teach={lesson.teach} learns={lesson.learns} placeholder={preview} />
         {lesson.closed && <span className="tag">모집 완료</span>}
       </div>
       <p className="card-content">{lesson.content || <span className="muted">소개 글이 여기에 보여요.</span>}</p>

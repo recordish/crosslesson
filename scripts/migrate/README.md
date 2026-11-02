@@ -12,7 +12,11 @@
             reg_date, last_update, hit, hide, prev, next, etc1, etc2, etc3, etc4
      FROM mini_board_language ORDER BY no DESC;
      ```
-     → `data/lessons.json`이 만들어집니다. 숨긴 글(`hide=1`)은 빠지고, `--include-hidden`을 붙이면 "모집 완료"로 옮깁니다
+     → `data/lessons.json`이 만들어집니다. 숨기거나 지운 글(`hide`가 1, 2, 99)은 빠지고, `--include-hidden`을 붙이면 "모집 완료"로 옮깁니다
+     - `title`(한 줄 소개)이 있으면 소개 글 앞에 붙입니다
+     - 가르칠 과목이나 배울 과목 한쪽이 없는 예전 글도 옮깁니다 (둘 다 없으면 건너뜀)
+   - 장소("강남", "분당", "online" 등)에서 시/도와 온라인 여부를 짐작합니다 (`import-lessons.mjs`의 `PLACE_SIDO`)
+   - `node import-lessons.mjs --dry-run --summary` 로 경고를 종류별 개수로만 볼 수 있습니다
    - **회원**: 아래 형식의 `data/users.json` (회원 테이블 `cl_member`에서. 변환 방법은 따로 안내)
 3. **서비스 계정 키**: Firebase 콘솔 → 프로젝트 설정 → 서비스 계정 → 새 비공개 키 → `service-account.json`으로 저장 (**절대 커밋 금지**)
 4. **연습 실행**: `--dry-run`을 붙이면 아무것도 저장하지 않고 경고만 보여 줍니다

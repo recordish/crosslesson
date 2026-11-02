@@ -11,7 +11,8 @@
 //   prev = 가르칠 과목 코드, next = 배울 과목 코드, etc2 = 희망 위치,
 //   theday = 요일 ("Monday,Tuesday"), thetime = 시간 코드 (10,14,16,18,20),
 //   theage = "20-45", ment = 소개, name = 닉네임, member_no = 회원번호 (cl_member.no),
-//   hit = 조회수, hide = 1 이면 숨긴 글 (기본은 옮기지 않음, --include-hidden 이면 "모집 완료"로 옮김)
+//   title = 한 줄 소개 (있으면 소개 글 앞에 붙임), hit = 조회수,
+//   hide = 0 이 아니면(1, 2, 99) 숨기거나 지운 글 (기본은 옮기지 않음, --include-hidden 이면 "모집 완료"로 옮김)
 import { readFileSync, writeFileSync } from 'node:fs'
 
 const IN = 'data/legacy-lessons.json'
@@ -53,13 +54,21 @@ function ages(v) {
   return one ? [Number(one[1]), null] : [null, null]
 }
 
+// 예전 글 1천여 개는 title 칸에 한 줄 소개(주로 영어)가 따로 있어서 소개 글 앞에 붙입니다.
+function mergeTitle(title, ment) {
+  if (!title) return ment
+  if (!ment) return title
+  if (ment.includes(title.slice(0, 30))) return ment
+  return `${title}\n\n${ment}`
+}
+
 const num = (v) => (v === null || v === undefined || v === '' ? null : Number(v))
 
 const rows = readRows(IN)
 const out = []
 let hidden = 0
 for (const r of rows) {
-  const isHidden = String(r.hide) === '1'
+  const isHidden = String(r.hide ?? '0') !== '0'
   if (isHidden && !includeHidden) {
     hidden++
     continue
@@ -77,7 +86,7 @@ for (const r of rows) {
     timeSlots: timeSlots(r.thetime),
     ageMin,
     ageMax,
-    content: toText(r.ment),
+    content: mergeTitle(toText(r.title), toText(r.ment)),
     views: num(r.hit) ?? 0,
     createdAt: num(r.reg_date),
     updatedAt: num(r.last_update) || num(r.reg_date),
@@ -86,7 +95,7 @@ for (const r of rows) {
 }
 
 writeFileSync(OUT, JSON.stringify(out, null, 1))
-const noTeach = out.filter((l) => !l.teach || !l.learn).length
+const noTeach = out.filter((l) => !l.teach && !l.learn).length
 console.log(`레슨 ${rows.length}개 읽음 → ${out.length}개를 ${OUT} 에 씀 (숨긴 글 ${hidden}개 제외${includeHidden ? ' 안 함' : ''})`)
-if (noTeach) console.warn(`  ⚠️ 과목 코드(prev/next)가 비어 있는 글 ${noTeach}개 → import 때 건너뜁니다`)
+if (noTeach) console.warn(`  ⚠️ 가르칠 과목과 배울 과목이 둘 다 비어 있는 글 ${noTeach}개 → import 때 건너뜁니다`)
 console.log('다음: node import-lessons.mjs --dry-run')

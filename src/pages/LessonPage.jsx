@@ -28,7 +28,7 @@ export default function LessonPage() {
   const [lesson, setLesson] = useState(undefined) // undefined: 불러오는 중, null: 없음
   const [author, setAuthor] = useState(null)
 
-  useTitle(lesson ? `${categoryName(lesson.teach)} ⇄ ${lesson.learns.map(categoryName).join(', ')} 교환` : '레슨')
+  useTitle(lesson ? [lesson.teach && categoryName(lesson.teach), lesson.learns.map(categoryName).join(', ')].filter(Boolean).join(' ⇄ ') + ' 교환' : '레슨')
 
   const reload = useCallback(() => getLesson(no).then(setLesson), [no])
 
@@ -238,7 +238,7 @@ function ApplyBox({ lesson, now }) {
         value={message}
         rows={5}
         maxLength={MESSAGE_MAX}
-        placeholder={`예: 안녕하세요! 영상 편집 3년 차입니다. ${categoryName(lesson.teach)} 배우고 싶어요. 주말 오후 가능해요.`}
+        placeholder={`예: 안녕하세요! 영상 편집 3년 차입니다. ${lesson.teach ? categoryName(lesson.teach) : '이 과목'} 배우고 싶어요. 주말 오후 가능해요.`}
         onChange={(e) => setMessage(e.target.value)}
       />
       <div className="form-foot">
