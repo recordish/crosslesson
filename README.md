@@ -121,8 +121,11 @@ npx firebase-tools deploy --only hosting --project <프로젝트ID>
 
 ## 안드로이드 앱 (Capacitor)
 
-Play 스토어의 기존 앱 `com.crosslesson.app`을 같은 패키지로 업데이트합니다. 앱은 빌드한 웹 화면(`dist/`)을 그대로 담습니다.
-**사이트 화면을 고치면 앱도 다시 빌드해서 올려야** 같은 화면이 보입니다 (데이터는 같은 Firebase 를 씀).
+Play 스토어의 기존 앱 `com.crosslesson.app`을 같은 패키지로 업데이트합니다.
+**웹앱 방식**: 앱이 켜질 때 `https://crosslesson.com`을 불러옵니다 (`capacitor.config.json`의 `server.url`).
+그래서 **사이트를 배포하면 앱 화면도 바로 바뀝니다** (앱을 다시 켜면 반영). 앱을 새로 올려야 하는 건
+아이콘·스플래시·권한·로그인 방식·앱 설정처럼 앱 자체를 바꿀 때뿐입니다.
+인터넷에 연결할 수 없으면 앱에 들어 있는 `public/offline.html`(다시 시도 버튼)을 보여줍니다.
 
 - 앱 안 Google 로그인: 휴대폰 계정 선택창(`@capgo/capacitor-social-login`) → 받은 토큰으로 Firebase 로그인
   - Firebase 에 안드로이드 앱과 서명 지문(SHA-1 `EF:8C:0C:D3:…:7D:67`)이 등록돼 있어야 합니다 (2026-11-02 등록 완료)

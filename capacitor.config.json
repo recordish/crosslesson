@@ -14,5 +14,13 @@
         "twitter": false
       }
     }
+  },
+  "server": {
+    "url": "https://crosslesson.com",
+    "allowNavigation": [
+      "crosslesson.com",
+      "www.crosslesson.com"
+    ],
+    "errorPath": "offline.html"
   }
 }
