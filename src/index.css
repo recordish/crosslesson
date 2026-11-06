@@ -326,7 +326,10 @@ textarea[aria-invalid='true'], input[aria-invalid='true'] { border-color: var(--
 .form-actions { padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
 
 /* ---------- 계정 삭제 ---------- */
-.delete-link-row { display: flex; justify-content: flex-end; margin-top: 48px; }
+/* 내용이 짧아도 화면 맨 아래(바닥글 바로 위)에 붙도록: 이 링크가 있는 화면만 본문을 세로 flex 로 */
+main.container:has(.delete-link-row) { display: flex; flex-direction: column; }
+.delete-link-row { display: flex; justify-content: flex-end; margin-top: auto; padding-top: 48px; }
+main.container:has(.delete-link-row) + .footer { margin-top: 0; }
 .delete-link { border: none; background: none; padding: 4px 0; font-size: 12px; font-weight: 400; color: var(--muted); opacity: 0.8; }
 .delete-link:hover:not(:disabled) { text-decoration: underline; border: none; opacity: 1; }
 .danger-zone { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); }
