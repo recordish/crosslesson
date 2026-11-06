@@ -16,7 +16,7 @@ export default function DeleteAccountInfoPage() {
       <ol>
         <li>앱 또는 웹사이트(crosslesson.com)에서 Google 계정으로 로그인합니다.</li>
         <li>위쪽 메뉴의 <strong>내 활동</strong>으로 갑니다.</li>
-        <li>화면 맨 아래 <strong>계정 삭제 → 계정 삭제하기</strong>를 누르고, 안내를 확인한 뒤 본인 확인을 위해 Google 계정을 한 번 더 선택합니다.</li>
+        <li>화면 맨 아래 오른쪽의 작은 <strong>계정 삭제</strong>를 누른 뒤 <strong>계정 삭제하기</strong>를 누르고, 안내를 확인한 뒤 본인 확인을 위해 Google 계정을 한 번 더 선택합니다.</li>
       </ol>
       <p>
         <Link to={user ? '/me' : '/login?next=%2Fme'} className="button primary">

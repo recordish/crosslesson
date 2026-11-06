@@ -325,7 +325,10 @@ textarea[aria-invalid='true'], input[aria-invalid='true'] { border-color: var(--
 .footer { padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
 .form-actions { padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
 
-/* ---------- 회원 탈퇴 ---------- */
+/* ---------- 계정 삭제 ---------- */
+.delete-link-row { display: flex; justify-content: flex-end; margin-top: 48px; }
+.delete-link { border: none; background: none; padding: 4px 0; font-size: 12px; font-weight: 400; color: var(--muted); opacity: 0.8; }
+.delete-link:hover:not(:disabled) { text-decoration: underline; border: none; opacity: 1; }
 .danger-zone { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); }
 .danger-zone h2 { font-size: 16px; margin: 0; color: var(--muted); }
 .danger-zone ul { margin: 0; padding-left: 20px; line-height: 1.8; }

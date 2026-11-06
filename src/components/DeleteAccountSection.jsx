@@ -26,15 +26,18 @@ export default function DeleteAccountSection() {
     }
   }
 
+  // 평소에는 맨 아래 오른쪽에 작은 회색 "계정 삭제" 글자만 보입니다
+  if (!open) {
+    return (
+      <div className="delete-link-row">
+        <button type="button" className="delete-link" onClick={() => setOpen(true)}>계정 삭제</button>
+      </div>
+    )
+  }
+
   return (
     <section className="form narrow danger-zone" aria-labelledby="delete-title">
       <h2 id="delete-title">계정 삭제</h2>
-      {!open ? (
-        <p>
-          <button type="button" className="link danger" onClick={() => setOpen(true)}>계정 삭제하기</button>
-        </p>
-      ) : (
-        <>
           <p>계정을 삭제하면 아래 내용이 <strong>모두 지워지고 되돌릴 수 없어요.</strong></p>
           <ul>
             <li>닉네임, 자기소개, 로그인 계정 정보</li>
@@ -55,8 +58,6 @@ export default function DeleteAccountSection() {
               {step || '계정 삭제하기'}
             </button>
           </div>
-        </>
-      )}
     </section>
   )
 }
