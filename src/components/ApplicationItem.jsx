@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { answerApplication, REPLY_MAX, STATUS_LABEL } from '../services/applicationService'
 import { fullDateTime, relativeTime } from '../utils/relativeTime'
 import { ExchangeBadges } from './CategoryBadge'
+import { displayName } from '../data/displayName.js'
 
 // 신청 한 건.
 // role: 'owner'(내 레슨에 들어온 신청 → 수락/거절 가능) | 'applicant'(내가 보낸 신청)
@@ -35,7 +36,7 @@ export default function ApplicationItem({ app, role, now, showLesson = true, onC
         <span className={`status s-${app.status}`}>{STATUS_LABEL[app.status]}</span>
       </div>
       <p className="app-from">
-        {role === 'owner' ? <strong>{app.applicantName}</strong> : '내 신청'}
+        {role === 'owner' ? <strong>{displayName(app.applicantName)}</strong> : '내 신청'}
         <span className="muted" title={fullDateTime(app.createdAt)}> · {relativeTime(app.createdAt, now)}</span>
       </p>
       <p className="app-message">{app.message}</p>

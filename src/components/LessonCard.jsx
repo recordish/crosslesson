@@ -3,6 +3,7 @@ import { ageLabel } from '../data/categories'
 import { modeLabel, scheduleLabel } from '../data/lessonOptions'
 import { fullDateTime, relativeTime } from '../utils/relativeTime'
 import { ExchangeBadges } from './CategoryBadge'
+import { displayName } from '../data/displayName.js'
 
 // 레슨 카드. preview 이면 링크 없이 보여줍니다 (등록 화면의 "이렇게 보여요").
 export default function LessonCard({ lesson, now, preview = false }) {
@@ -21,7 +22,7 @@ export default function LessonCard({ lesson, now, preview = false }) {
         <span>{ageLabel(lesson.ageMin, lesson.ageMax)}</span>
       </p>
       <p className="card-meta">
-        <span className="author">{lesson.authorName}</span>
+        <span className="author">{displayName(lesson.authorName)}</span>
         <time dateTime={new Date(lesson.createdAt).toISOString()} title={fullDateTime(lesson.createdAt)}>
           {relativeTime(lesson.createdAt, now)}
         </time>

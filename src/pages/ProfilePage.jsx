@@ -12,7 +12,7 @@ export default function ProfilePage() {
   const { user, profile, setProfile } = useAuth()
   const navigate = useNavigate()
   const next = safeNext(useSearchParams()[0].get('next'))
-  const [nickname, setNickname] = useState(profile?.nickname ?? '')
+  const [nickname, setNickname] = useState(profile?.nickname ? profile.nickname.split('@')[0] : '')
   const [intro, setIntro] = useState(profile?.intro ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -25,6 +25,10 @@ export default function ProfilePage() {
     e.preventDefault()
     if (!nameOk) {
       setError(`닉네임은 ${NICKNAME_MIN}~${NICKNAME_MAX}자로 정해 주세요.`)
+      return
+    }
+    if (nickname.includes('@')) {
+      setError('닉네임에는 이메일 주소나 @ 기호를 쓸 수 없어요.')
       return
     }
     setSaving(true)

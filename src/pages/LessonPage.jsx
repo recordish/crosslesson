@@ -19,6 +19,7 @@ import {
 import { countView, deleteLesson, getLesson, setLessonClosed } from '../services/lessonService'
 import { getProfile } from '../services/profileService'
 import { fullDateTime, relativeTime } from '../utils/relativeTime'
+import { displayName } from '../data/displayName.js'
 
 export default function LessonPage() {
   const no = Number(useParams().no)
@@ -106,7 +107,7 @@ export default function LessonPage() {
       <p className="lesson-content">{lesson.content}</p>
 
       <section className="author-box">
-        <strong>{lesson.authorName}</strong>
+        <strong>{displayName(lesson.authorName)}</strong>
         {author?.intro && <p>{author.intro}</p>}
       </section>
 

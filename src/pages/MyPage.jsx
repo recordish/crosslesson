@@ -9,6 +9,7 @@ import { useTitle } from '../hooks/useTitle'
 import { cancelApplication, getReceivedApplications, getSentApplications } from '../services/applicationService'
 import { logout } from '../services/authService'
 import { getLessonsByUser } from '../services/lessonService'
+import { displayName } from '../data/displayName.js'
 
 const TABS = [
   ['lessons', '내 레슨'],
@@ -59,7 +60,7 @@ export default function MyPage() {
     <>
       <section className="me-head">
         <div>
-          <strong className="me-name">{profile.nickname}</strong>
+          <strong className="me-name">{displayName(profile.nickname)}</strong>
           {profile.intro && <p className="muted">{profile.intro}</p>}
         </div>
         <div className="actions">
