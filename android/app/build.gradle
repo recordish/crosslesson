@@ -7,7 +7,6 @@ android {
         applicationId "com.crosslesson.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        // 버전 코드는 예전 앱보다 커야 합니다 (yyyyMMddNN). 출시할 때마다 올립니다.
         // Play 프로덕션은 5(5.0) 다음부터 1씩 올립니다. 날짜형(2026…) 코드는 너무 커서 거부됨.
         versionCode 6
         versionName "2.1.2"
