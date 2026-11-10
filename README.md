@@ -109,16 +109,6 @@ npx firebase-tools deploy --only hosting --project <프로젝트ID>
   `?no=`·`?d=` 값이 필요한 `lesson.php`, `class.php`, `learn.php`는 앱(`LegacyRedirect`)이 새 주소로 넘깁니다.
   (Firebase Hosting은 물음표 뒤 값으로 서버 리다이렉트를 할 수 없습니다)
 
-### 도메인 연결 (crosslesson.com, 카페24 도메인)
-
-1. Firebase 콘솔 → Hosting → **커스텀 도메인 추가** → `crosslesson.com` 입력
-2. Firebase가 알려 주는 **TXT 레코드**(소유 확인)와 **A 레코드**를 카페24 도메인 관리의 DNS 설정에 추가하고,
-   예전 카페24 호스팅을 가리키던 A 레코드는 지웁니다. 메일을 쓰고 있다면 MX 레코드는 그대로 둡니다
-3. `www.crosslesson.com`도 추가하고 `crosslesson.com`으로 리다이렉트하도록 고릅니다
-4. Authentication → 설정 → **승인된 도메인**에 `crosslesson.com` 추가
-5. 인증서 발급까지 몇 시간 걸릴 수 있습니다. 새 사이트가 잘 뜨는지 확인한 뒤 카페24 호스팅을 해지합니다
-   (⚠️ 해지 전에 예전 DB를 반드시 내보내 두세요. 도메인은 호스팅을 해지해도 그대로 유지됩니다)
-
 ## 안드로이드 앱 (Capacitor)
 
 Play 스토어의 기존 앱 `com.crosslesson.app`을 같은 패키지로 업데이트합니다.
