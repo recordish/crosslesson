@@ -93,7 +93,7 @@ Firebase 설정값(`.env.local`)이 없으면 **로컬 모드**로 동작합니�
 
 ## 배포 (Firebase Hosting)
 
-크로스레슨 전용 Firebase 프로젝트에 화면과 데이터를 함께 둡니다. 카페24 웹호스팅은 쓰지 않습니다.
+크로스레슨 전용 Firebase 프로젝트에 화면과 데이터를 함께 둡니다.
 
 **자동**: 서비스 계정 키(JSON 전체)를 저장소 Secrets의 `FIREBASE_SERVICE_ACCOUNT`로 등록하면
 `main`에 푸시할 때마다 GitHub Actions가 빌드해서 배포합니다. 프로젝트 ID는 `.env.production`에서 읽습니다.
