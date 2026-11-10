@@ -157,10 +157,10 @@ service cloud.firestore {
 
     // ---------- 접속 기록 ----------
     // 누구나 한 건씩 남길 수 있고(형식 검사), 관리자만 읽습니다. 고칠 수 없고,
-    // 1년이 지난 기록만 관리자가 지울 수 있습니다 (관리자 페이지를 열 때 자동 정리).
+    // 5년이 지난 기록만 관리자가 지울 수 있습니다 (관리자 페이지를 열 때 자동 정리).
     match /visits/{id} {
       allow read: if isAdmin();
-      allow delete: if isAdmin() && resource.data.t < request.time.toMillis() - 31536000000;
+      allow delete: if isAdmin() && resource.data.t < request.time.toMillis() - 157680000000;
       allow create: if request.resource.data.keys().hasOnly(['t', 'vid', 'sid', 'entry', 'newVisitor', 'path',
              'ref', 'refPath', 'source', 'medium', 'campaign', 'lang', 'tz', 'country', 'device', 'os', 'browser',
              'app', 'signedIn', 'expireAt'])
@@ -186,7 +186,7 @@ service cloud.firestore {
         && request.resource.data.app is bool
         && request.resource.data.signedIn is bool
         && request.resource.data.expireAt is timestamp
-        && request.resource.data.expireAt < request.time + duration.value(400, 'd');
+        && request.resource.data.expireAt < request.time + duration.value(1860, 'd');
     }
   }
 }

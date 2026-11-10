@@ -18,11 +18,11 @@ export async function listVisits(sinceMs) {
   return (await getDocs(q)).docs.map((d) => ({ id: d.id, ...d.data() }))
 }
 
-const YEAR = 365 * 24 * 3600 * 1000
+const KEEP = 5 * 365 * 24 * 3600 * 1000 // 보관 기간 5년
 
-// 1년이 지난 접속 기록 정리 (한 번에 최대 300건)
+// 5년이 지난 접속 기록 정리 (한 번에 최대 300건)
 export async function purgeOldVisits() {
-  const q = query(collection(db, 'visits'), where('t', '<', Date.now() - YEAR - 60000), limit(300))
+  const q = query(collection(db, 'visits'), where('t', '<', Date.now() - KEEP - 60000), limit(300))
   const docs = (await getDocs(q)).docs
   await Promise.all(docs.map((d) => deleteDoc(d.ref)))
   return docs.length

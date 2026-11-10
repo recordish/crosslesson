@@ -111,7 +111,7 @@ await t('profile: other delete denied', assertFails(deleteDoc(doc(B, 'users/user
 const visit = (extra = {}) => ({ t: Date.now(), vid: 'v1', sid: 's1', entry: true, newVisitor: true, path: '/', ref: 'google.com',
   refPath: '/', source: '', medium: '', campaign: '', lang: 'ko-KR', tz: 'Asia/Seoul', country: 'KR', device: 'mobile',
   os: 'Android', browser: 'Chrome', app: false, signedIn: false,
-  expireAt: Timestamp.fromMillis(Date.now() + 365 * 864e5), ...extra })
+  expireAt: Timestamp.fromMillis(Date.now() + 5 * 365 * 864e5), ...extra })
 await env.withSecurityRulesDisabled((c) => setDoc(doc(c.firestore(), 'admins/userA'), { createdAt: now }))
 await t('admins: own check', assertSucceeds(getDoc(doc(A, 'admins/userA'))))
 await t('admins: B own check (missing) ok', assertSucceeds(getDoc(doc(B, 'admins/userB'))))
@@ -128,7 +128,9 @@ await t('visits: non-admin list denied', assertFails(getDocs(collection(B, 'visi
 await t('visits: admin list', assertSucceeds(getDocs(query(collection(A, 'visits'), where('t', '>=', 0)))))
 await t('visits: update denied', assertFails(updateDoc(doc(A, 'visits/x1'), { path: '/x' })))
 await t('visits: delete recent denied', assertFails(deleteDoc(doc(A, 'visits/x1'))))
-await env.withSecurityRulesDisabled((c) => setDoc(doc(c.firestore(), 'visits/old'), visit({ t: Date.now() - 400 * 864e5 })))
+await env.withSecurityRulesDisabled((c) => setDoc(doc(c.firestore(), 'visits/old'), visit({ t: Date.now() - 1900 * 864e5 })))
+await env.withSecurityRulesDisabled((c) => setDoc(doc(c.firestore(), 'visits/y2'), visit({ t: Date.now() - 730 * 864e5 })))
+await t('visits: admin delete 2-year-old denied', assertFails(deleteDoc(doc(A, 'visits/y2'))))
 await t('visits: non-admin delete old denied', assertFails(deleteDoc(doc(B, 'visits/old'))))
 await t('visits: admin delete old', assertSucceeds(deleteDoc(doc(A, 'visits/old'))))
 
