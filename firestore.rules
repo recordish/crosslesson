@@ -146,5 +146,47 @@ service cloud.firestore {
       // 신청자: 취소. 레슨 작성자: 탈퇴하거나 레슨을 지울 때 받은 신청 정리
       allow delete: if signedIn() && (resource.data.applicantUid == me() || resource.data.lessonOwnerUid == me());
     }
+
+    // ---------- 관리자 ----------
+    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/admins/$(me())); }
+
+    // admins/{uid}: 본인이 관리자인지만 확인할 수 있고, 쓰기는 서버(관리 스크립트)에서만
+    match /admins/{uid} {
+      allow get: if signedIn() && me() == uid;
+    }
+
+    // ---------- 접속 기록 ----------
+    // 누구나 한 건씩 남길 수 있고(형식 검사), 관리자만 읽습니다. 고칠 수 없고,
+    // 1년이 지난 기록만 관리자가 지울 수 있습니다 (관리자 페이지를 열 때 자동 정리).
+    match /visits/{id} {
+      allow read: if isAdmin();
+      allow delete: if isAdmin() && resource.data.t < request.time.toMillis() - 31536000000;
+      allow create: if request.resource.data.keys().hasOnly(['t', 'vid', 'sid', 'entry', 'newVisitor', 'path',
+             'ref', 'refPath', 'source', 'medium', 'campaign', 'lang', 'tz', 'country', 'device', 'os', 'browser',
+             'app', 'signedIn', 'expireAt'])
+        && request.resource.data.t is int
+        && request.resource.data.t > request.time.toMillis() - 600000
+        && request.resource.data.t < request.time.toMillis() + 600000
+        && isStr(request.resource.data.vid, 1, 40)
+        && isStr(request.resource.data.sid, 1, 40)
+        && request.resource.data.entry is bool
+        && request.resource.data.newVisitor is bool
+        && isStr(request.resource.data.path, 1, 200)
+        && isStr(request.resource.data.ref, 0, 100)
+        && isStr(request.resource.data.refPath, 0, 200)
+        && isStr(request.resource.data.source, 0, 100)
+        && isStr(request.resource.data.medium, 0, 100)
+        && isStr(request.resource.data.campaign, 0, 100)
+        && isStr(request.resource.data.lang, 0, 20)
+        && isStr(request.resource.data.tz, 0, 50)
+        && isStr(request.resource.data.country, 0, 2)
+        && request.resource.data.device in ['mobile', 'tablet', 'desktop']
+        && isStr(request.resource.data.os, 1, 20)
+        && isStr(request.resource.data.browser, 1, 30)
+        && request.resource.data.app is bool
+        && request.resource.data.signedIn is bool
+        && request.resource.data.expireAt is timestamp
+        && request.resource.data.expireAt < request.time + duration.value(400, 'd');
+    }
   }
 }

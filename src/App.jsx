@@ -15,6 +15,10 @@ import LessonPage from './pages/LessonPage'
 import LoginPage from './pages/LoginPage'
 import MyPage from './pages/MyPage'
 import NotFoundPage from './pages/NotFoundPage'
+import PageTracker from './components/PageTracker'
+import { lazy, Suspense } from 'react'
+
+const AdminPage = lazy(() => import('./pages/AdminPage'))
 import ProfilePage from './pages/ProfilePage'
 
 // 주소를 /lesson/5858 처럼 깔끔하게 쓰려고 BrowserRouter 를 씁니다.
@@ -24,6 +28,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <ScrollToTop />
+        <PageTracker />
         <Header />
         <main className="container">
           <RouteBoundary>
@@ -34,6 +39,7 @@ export default function App() {
             <Route path="/new" element={<ProtectedRoute><LessonFormPage /></ProtectedRoute>} />
             <Route path="/me" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute requireProfile={false}><ProfilePage /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute requireProfile={false}><Suspense fallback={<p className="empty">불러오는 중…</p>}><AdminPage /></Suspense></ProtectedRoute>} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />

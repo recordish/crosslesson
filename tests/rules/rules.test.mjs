@@ -1,7 +1,7 @@
 // firestore.rules 테스트. 실행: cd tests/rules && npm install && npm test
 import { readFileSync } from 'node:fs'
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing'
-import { doc, getDoc, setDoc, updateDoc, deleteDoc, increment, runTransaction, collection, query, where, getDocs } from 'firebase/firestore'
+import { Timestamp, doc, getDoc, setDoc, updateDoc, deleteDoc, increment, runTransaction, collection, query, where, getDocs } from 'firebase/firestore'
 
 const env = await initializeTestEnvironment({
   projectId: 'demo-crosslesson',
@@ -106,6 +106,31 @@ await t('app: B re-applies', assertSucceeds(setDoc(doc(B, 'applications/1_userB'
 await t('app: lesson owner can delete received (account deletion)', assertSucceeds(deleteDoc(doc(A, 'applications/1_userB'))))
 await t('profile: own delete', assertSucceeds(deleteDoc(doc(B, 'users/userB'))))
 await t('profile: other delete denied', assertFails(deleteDoc(doc(B, 'users/userA'))))
+
+// admins / visits
+const visit = (extra = {}) => ({ t: Date.now(), vid: 'v1', sid: 's1', entry: true, newVisitor: true, path: '/', ref: 'google.com',
+  refPath: '/', source: '', medium: '', campaign: '', lang: 'ko-KR', tz: 'Asia/Seoul', country: 'KR', device: 'mobile',
+  os: 'Android', browser: 'Chrome', app: false, signedIn: false,
+  expireAt: Timestamp.fromMillis(Date.now() + 365 * 864e5), ...extra })
+await env.withSecurityRulesDisabled((c) => setDoc(doc(c.firestore(), 'admins/userA'), { createdAt: now }))
+await t('admins: own check', assertSucceeds(getDoc(doc(A, 'admins/userA'))))
+await t('admins: B own check (missing) ok', assertSucceeds(getDoc(doc(B, 'admins/userB'))))
+await t('admins: read other denied', assertFails(getDoc(doc(B, 'admins/userA'))))
+await t('admins: self-grant denied', assertFails(setDoc(doc(B, 'admins/userB'), { createdAt: now })))
+await t('visits: anon create', assertSucceeds(setDoc(doc(anon, 'visits/x1'), visit())))
+await t('visits: extra field denied', assertFails(setDoc(doc(anon, 'visits/x2'), visit({ ip: '1.2.3.4' }))))
+await t('visits: old time denied', assertFails(setDoc(doc(anon, 'visits/x3'), visit({ t: Date.now() - 3600000 }))))
+await t('visits: far expireAt denied', assertFails(setDoc(doc(anon, 'visits/x6'), visit({ expireAt: Timestamp.fromMillis(Date.now() + 3650 * 864e5) }))))
+await t('visits: bad device denied', assertFails(setDoc(doc(anon, 'visits/x4'), visit({ device: 'robot' }))))
+await t('visits: long path denied', assertFails(setDoc(doc(anon, 'visits/x5'), visit({ path: '/'.repeat(201) }))))
+await t('visits: anon read denied', assertFails(getDoc(doc(anon, 'visits/x1'))))
+await t('visits: non-admin list denied', assertFails(getDocs(collection(B, 'visits'))))
+await t('visits: admin list', assertSucceeds(getDocs(query(collection(A, 'visits'), where('t', '>=', 0)))))
+await t('visits: update denied', assertFails(updateDoc(doc(A, 'visits/x1'), { path: '/x' })))
+await t('visits: delete recent denied', assertFails(deleteDoc(doc(A, 'visits/x1'))))
+await env.withSecurityRulesDisabled((c) => setDoc(doc(c.firestore(), 'visits/old'), visit({ t: Date.now() - 400 * 864e5 })))
+await t('visits: non-admin delete old denied', assertFails(deleteDoc(doc(B, 'visits/old'))))
+await t('visits: admin delete old', assertSucceeds(deleteDoc(doc(A, 'visits/old'))))
 
 console.log(`\n${pass} passed, ${fail} failed`)
 await env.cleanup()
