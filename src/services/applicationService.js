@@ -8,6 +8,7 @@
 import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from 'firebase/firestore/lite'
 import { db } from '../firebase/config'
 import { delay, readDb, writeDb } from './localDb'
+import { requestNotify } from './notifyService'
 
 export const MESSAGE_MIN = 5
 export const MESSAGE_MAX = 1000
@@ -45,8 +46,10 @@ export async function apply(user, profile, lesson, message) {
     createdAt: now,
     updatedAt: now,
   }
-  if (db) await setDoc(doc(appsCol(), id), data)
-  else writeDb((d) => (d.applications[id] = data))
+  if (db) {
+    await setDoc(doc(appsCol(), id), data)
+    requestNotify('applied', id)
+  } else writeDb((d) => (d.applications[id] = data))
 }
 
 export async function cancelApplication(id) {
@@ -54,10 +57,13 @@ export async function cancelApplication(id) {
   else writeDb((d) => delete d.applications[id])
 }
 
-export async function answerApplication(id, status, reply) {
+// prevStatus: 바꾸기 전 상태. 상태가 바뀔 때만 신청자에게 알림 메일을 보냅니다 (답장만 고치면 보내지 않음).
+export async function answerApplication(id, status, reply, prevStatus) {
   const patch = { status, reply: reply.trim(), updatedAt: Date.now() }
-  if (db) await updateDoc(doc(appsCol(), id), patch)
-  else writeDb((d) => (d.applications[id] = { ...d.applications[id], ...patch }))
+  if (db) {
+    await updateDoc(doc(appsCol(), id), patch)
+    if (status !== 'pending' && status !== prevStatus) requestNotify('replied', id)
+  } else writeDb((d) => (d.applications[id] = { ...d.applications[id], ...patch }))
 }
 
 async function listWhere(field, value, extra) {

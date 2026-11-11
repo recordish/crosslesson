@@ -38,6 +38,7 @@ export default function PrivacyPage() {
       <ul>
         <li>회원 식별과 로그인 유지</li>
         <li>재능교환 레슨의 게시·검색과 신청·수락·답장 기능 제공</li>
+        <li>내 레슨에 신청이 오거나 내 신청에 답장이 왔을 때 Google 계정 이메일로 알림 메일 발송 (내 활동 화면이나 메일의 수신 거부 링크로 끌 수 있음)</li>
         <li>부정 이용 방지, 문의·고충 처리</li>
         <li>방문 통계를 통한 서비스 개선 (운영자만 열람)</li>
       </ul>
@@ -66,7 +67,7 @@ export default function PrivacyPage() {
       <div className="table-wrap">
         <table>
           <tbody>
-            <tr><th>이전받는 자</th><td>Google LLC (Firebase Authentication, Cloud Firestore, Firebase Hosting)<br />연락처: <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noreferrer">firebase.google.com/support/privacy</a></td></tr>
+            <tr><th>이전받는 자</th><td>Google LLC (Firebase Authentication, Cloud Firestore, Firebase Hosting, 알림 메일 발송을 위한 Gmail·Google Apps Script)<br />연락처: <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noreferrer">firebase.google.com/support/privacy</a></td></tr>
             <tr><th>이전 국가</th><td>레슨·프로필·신청 데이터는 대한민국(서울 리전)에 저장됩니다. 로그인 처리와 웹사이트 전송은 미국 등 Google이 운영하는 국외 서버를 거칠 수 있습니다.</td></tr>
             <tr><th>이전 항목</th><td>제1항의 개인정보 전체</td></tr>
             <tr><th>이전 일시·방법</th><td>서비스를 이용할 때 정보통신망을 통해 수시로 전송</td></tr>

@@ -14,7 +14,7 @@ export default function ApplicationItem({ app, role, now, showLesson = true, onC
   async function answer(status) {
     setSaving(true)
     try {
-      await answerApplication(app.id, status, reply)
+      await answerApplication(app.id, status, reply, app.status)
       onChanged?.()
     } catch (e) {
       console.error(e)

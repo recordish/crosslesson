@@ -39,6 +39,7 @@ export async function deleteAccount(user, onStep = () => {}) {
   onStep('프로필 지우는 중…')
   await deleteDoc(doc(db, 'users', user.uid))
   await deleteDoc(doc(db, 'members', user.uid))
+  await deleteDoc(doc(db, 'emailPrefs', user.uid))
 
   onStep('계정 지우는 중…')
   await deleteCurrentUser()

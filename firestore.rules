@@ -168,6 +168,16 @@ service cloud.firestore {
       allow delete: if signedIn() && me() == uid;
     }
 
+    // ---------- 알림 메일 설정 ----------
+    // emailPrefs/{uid} = { off, updatedAt }: 본인만 읽고 씁니다 (메일 발송 스크립트는 서버 권한으로 읽음)
+    match /emailPrefs/{uid} {
+      allow get, delete: if signedIn() && me() == uid;
+      allow create, update: if signedIn() && me() == uid
+        && request.resource.data.keys().hasOnly(['off', 'updatedAt'])
+        && request.resource.data.off is bool
+        && isTime(request.resource.data.updatedAt);
+    }
+
     // ---------- 접속 기록 ----------
     // 누구나 한 건씩 남길 수 있고(형식 검사), 관리자만 읽습니다. 고칠 수 없고,
     // 5년이 지난 기록만 관리자가 지울 수 있습니다 (관리자 페이지를 열 때 자동 정리).

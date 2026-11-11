@@ -149,6 +149,14 @@ await t('members: admin get other', assertSucceeds(getDoc(doc(Am, 'members/userB
 await t('members: admin list', assertSucceeds(getDocs(collection(Am, 'members'))))
 await t('members: own delete', assertSucceeds(deleteDoc(doc(Bm, 'members/userB'))))
 
+// emailPrefs
+await t('emailPrefs: own set', assertSucceeds(setDoc(doc(B, 'emailPrefs/userB'), { off: true, updatedAt: now })))
+await t('emailPrefs: own read', assertSucceeds(getDoc(doc(B, 'emailPrefs/userB'))))
+await t('emailPrefs: other read denied', assertFails(getDoc(doc(A, 'emailPrefs/userB'))))
+await t('emailPrefs: other write denied', assertFails(setDoc(doc(A, 'emailPrefs/userB'), { off: false, updatedAt: now })))
+await t('emailPrefs: bad field denied', assertFails(setDoc(doc(B, 'emailPrefs/userB'), { off: 'yes', updatedAt: now })))
+await t('emailPrefs: own delete', assertSucceeds(deleteDoc(doc(B, 'emailPrefs/userB'))))
+
 console.log(`\n${pass} passed, ${fail} failed`)
 await env.cleanup()
 process.exit(fail ? 1 : 0)
