@@ -132,6 +132,8 @@ await t('visits: own uid ok', assertSucceeds(setDoc(doc(B, 'visits/u1'), visit({
 await t('visits: other uid denied', assertFails(setDoc(doc(B, 'visits/u2'), visit({ uid: 'userA', signedIn: true }))))
 await t('visits: anon with uid denied', assertFails(setDoc(doc(anon, 'visits/u3'), visit({ uid: 'userB' }))))
 await t('visits: anon empty uid ok', assertSucceeds(setDoc(doc(anon, 'visits/u4'), visit({ uid: '' }))))
+await t('visits: ua ok', assertSucceeds(setDoc(doc(anon, 'visits/ua1'), visit({ ua: 'Mozilla/5.0 (X11; Linux x86_64)' }))))
+await t('visits: ua too long denied', assertFails(setDoc(doc(anon, 'visits/ua2'), visit({ ua: 'x'.repeat(301) }))))
 await t('visits: bad device denied', assertFails(setDoc(doc(anon, 'visits/x4'), visit({ device: 'robot' }))))
 await t('visits: long path denied', assertFails(setDoc(doc(anon, 'visits/x5'), visit({ path: '/'.repeat(201) }))))
 await t('visits: anon read denied', assertFails(getDoc(doc(anon, 'visits/x1'))))

@@ -189,7 +189,7 @@ service cloud.firestore {
       allow delete: if isAdmin() && resource.data.t < request.time.toMillis() - 157680000000;
       allow create: if request.resource.data.keys().hasOnly(['t', 'vid', 'sid', 'entry', 'newVisitor', 'path',
              'ref', 'refPath', 'source', 'medium', 'campaign', 'lang', 'tz', 'country', 'device', 'os', 'browser',
-             'app', 'signedIn', 'uid', 'expireAt'])
+             'app', 'signedIn', 'uid', 'ua', 'expireAt'])
         && request.resource.data.t is int
         && request.resource.data.t > request.time.toMillis() - 600000
         && request.resource.data.t < request.time.toMillis() + 600000
@@ -211,6 +211,7 @@ service cloud.firestore {
         && isStr(request.resource.data.browser, 1, 30)
         && request.resource.data.app is bool
         && request.resource.data.signedIn is bool
+        && isStr(request.resource.data.get('ua', ''), 0, 300)
         && (request.resource.data.get('uid', '') == '' || (signedIn() && request.resource.data.uid == me()))
         && request.resource.data.expireAt is timestamp
         && request.resource.data.expireAt < request.time + duration.value(1860, 'd');

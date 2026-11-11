@@ -1,6 +1,7 @@
 // 접속 기록 (관리자 페이지 /admin 에서만 볼 수 있습니다)
 //   visits/{자동 ID} = { t, vid, sid, entry, newVisitor, path, ref, refPath, source, medium, campaign,
-//                       lang, tz, country, device, os, browser, app, signedIn, uid, expireAt }
+//                       lang, tz, country, device, os, browser, app, signedIn, uid, ua, expireAt }
+// ua: 분류하지 못한 방문(운영체제·브라우저 '기타', Linux PC)만 브라우저 식별 문자열 원문, 나머지는 ''
 // uid: 로그인한 상태면 회원 식별자 (관리자 페이지에서 닉네임으로 보여 줌), 아니면 ''
 // 5년이 지난 기록은 관리자 페이지를 열 때 지웁니다 (adminService.purgeOldVisits).
 // expireAt 은 나중에 유료 요금제에서 Firestore TTL 정책을 켤 때를 위한 값입니다.
@@ -170,11 +171,14 @@ export async function trackPageView(path, { uid = '' } = {}) {
     tz,
     country: guessCountry(tz, lang),
     ...deviceInfo(ua),
+    ua: '',
     app: Boolean(window.Capacitor?.isNativePlatform?.()),
     signedIn: Boolean(uid),
     uid: cut(uid, 128),
     expireAt: Timestamp.fromMillis(Date.now() + 5 * 365 * 24 * 3600 * 1000),
   }
+  // 운영체제·브라우저를 알아보지 못했거나 Linux PC(봇이 많음)면 원문을 남겨 분류를 고칠 때 씁니다.
+  if (visit.os === '기타' || visit.browser === '기타' || (visit.os === 'Linux' && visit.device === 'desktop')) visit.ua = cut(ua, 300)
   // 같은 세션의 다음 화면부터는 첫 방문/첫 화면이 아닙니다.
   s.entry = false
   s.newVisitor = false

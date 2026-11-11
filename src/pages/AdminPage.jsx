@@ -97,6 +97,7 @@ function summarize(visits) {
     devices: countBy(sessions, (s) => DEVICE[s.device] ?? s.device),
     os: countBy(sessions, (s) => s.os),
     browsers: countBy(sessions, (s) => s.browser),
+    unknownUa: countBy(visits.filter((v) => v.ua), (v) => v.ua),
     platforms: countBy(sessions, (s) => (s.app ? '안드로이드 앱' : '웹')),
     signedIn: sessions.filter((s) => s.signedIn).length,
   }
@@ -349,6 +350,7 @@ function VisitsView() {
             <Table title="기기" rows={s.devices} total={total} />
             <Table title="운영체제" rows={s.os} total={total} />
             <Table title="브라우저" rows={s.browsers} total={total} />
+            <Table title="분류 못한 기기 원문 (기타·Linux PC)" rows={s.unknownUa} unit="페이지뷰" limit={5} />
           </div>
         </>
       )}
