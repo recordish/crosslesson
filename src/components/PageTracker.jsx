@@ -12,7 +12,7 @@ export default function PageTracker() {
   useEffect(() => {
     if (loading || last.current === pathname) return
     last.current = pathname
-    trackPageView(pathname, { signedIn: Boolean(user) })
+    trackPageView(pathname, { uid: user?.uid ?? '' })
   }, [pathname, loading, user])
 
   return null

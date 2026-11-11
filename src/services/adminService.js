@@ -42,3 +42,14 @@ export async function listMembers() {
   )
   return rows.sort((a, b) => b.joinedAt - a.joinedAt)
 }
+
+// uid 목록 → { uid: 닉네임 } (공개 프로필에서)
+export async function getNicknames(uids) {
+  const entries = await Promise.all(
+    [...new Set(uids)].filter(Boolean).map(async (uid) => {
+      const snap = await getDoc(doc(db, 'users', uid)).catch(() => null)
+      return [uid, snap?.exists() ? snap.data().nickname : '']
+    }),
+  )
+  return Object.fromEntries(entries)
+}

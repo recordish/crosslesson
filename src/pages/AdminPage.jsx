@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useTitle } from '../hooks/useTitle'
-import { isAdmin, listMembers, listVisits, MAX_VISITS, purgeOldVisits } from '../services/adminService'
+import { getNicknames, isAdmin, listMembers, listVisits, MAX_VISITS, purgeOldVisits } from '../services/adminService'
+import { displayName } from '../data/displayName.js'
 import { setNoTrack } from '../services/analytics'
 
 const PERIODS = [
@@ -69,10 +70,16 @@ function summarize(visits) {
   const bySession = new Map()
   for (const v of [...visits].sort((a, b) => a.t - b.t)) {
     const s = bySession.get(v.sid)
-    if (s) s.pages += 1
-    else bySession.set(v.sid, { ...v, ...channelOf(v), pages: 1 })
+    if (s) {
+      s.pages += 1
+      if (!s.uid && v.uid) s.uid = v.uid
+    } else bySession.set(v.sid, { ...v, uid: v.uid || '', ...channelOf(v), pages: 1 })
   }
   const sessions = [...bySession.values()]
+  // 로그인하기 전 방문도 같은 기기(방문자 번호)에서 로그인한 기록이 있으면 그 회원으로 봅니다.
+  const vidUid = new Map()
+  for (const v of visits) if (v.uid && !vidUid.has(v.vid)) vidUid.set(v.vid, v.uid)
+  for (const s of sessions) if (!s.uid && vidUid.has(s.vid)) { s.uid = vidUid.get(s.vid); s.uidGuess = true }
   const days = countBy(sessions, (s) => new Date(s.t).toLocaleDateString('sv-SE')).sort((a, b) => (a[0] < b[0] ? -1 : 1))
   return {
     pageviews: visits.length,
@@ -220,6 +227,7 @@ function AdminNav() {
 }
 
 function VisitsView() {
+  const [nicknames, setNicknames] = useState({})
   const [period, setPeriod] = useState('7')
   const [visits, setVisits] = useState(null)
   const [error, setError] = useState('')
@@ -229,7 +237,12 @@ function VisitsView() {
     setVisits(null)
     setError('')
     listVisits(sinceOf(period))
-      .then((v) => alive && setVisits(v))
+      .then(async (v) => {
+        if (!alive) return
+        setVisits(v)
+        const names = await getNicknames(v.map((x) => x.uid))
+        if (alive) setNicknames(names)
+      })
       .catch((e) => {
         console.error(e)
         if (alive) setError('접속 기록을 불러오지 못했어요.')
@@ -257,7 +270,7 @@ function VisitsView() {
         </div>
       </div>
       <p className="muted admin-note">
-        검색 로봇·자동화 도구와 관리자 본인의 방문은 빠져 있어요. 국가는 기기 시간대·언어로 추정한 값입니다. 2026년 11월 10일부터 기록합니다.
+        검색 로봇·자동화 도구와 관리자 본인의 방문은 빠져 있어요. 닉네임 옆 *는 로그인 전 방문(같은 기기에서 로그인한 회원)이에요. 국가는 기기 시간대·언어로 추정한 값입니다. 2026년 11월 10일부터 기록합니다.
       </p>
 
       {error && <p className="error">{error}</p>}
@@ -310,12 +323,21 @@ function VisitsView() {
             <div className="table-wrap">
               <table className="admin-recent">
                 <thead>
-                  <tr><th>시각</th><th>유입</th><th>첫 화면</th><th>화면 수</th><th>국가</th><th>언어</th><th>기기</th></tr>
+                  <tr><th>시각</th><th>닉네임</th><th>유입</th><th>첫 화면</th><th>화면 수</th><th>국가</th><th>언어</th><th>기기</th></tr>
                 </thead>
                 <tbody>
                   {[...s.sessions].reverse().slice(0, 50).map((v) => (
                     <tr key={v.sid}>
                       <td>{new Date(v.t).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                      <td>
+                        {v.uid ? (
+                          <span className={v.uidGuess ? 'muted' : ''} title={v.uidGuess ? '같은 기기에서 로그인한 회원 (이 방문은 로그인 전)' : ''}>
+                            {nicknames[v.uid] ? displayName(nicknames[v.uid]) : '회원'}{v.uidGuess ? ' *' : ''}
+                          </span>
+                        ) : (
+                          <span className="muted">-</span>
+                        )}
+                      </td>
                       <td>{v.channel === v.detail ? v.channel : `${v.channel} · ${v.detail}`}</td>
                       <td>{pageName(v.path)}</td>
                       <td>{v.pages}</td>

@@ -1,6 +1,7 @@
 // 접속 기록 (관리자 페이지 /admin 에서만 볼 수 있습니다)
 //   visits/{자동 ID} = { t, vid, sid, entry, newVisitor, path, ref, refPath, source, medium, campaign,
-//                       lang, tz, country, device, os, browser, app, signedIn, expireAt }
+//                       lang, tz, country, device, os, browser, app, signedIn, uid, expireAt }
+// uid: 로그인한 상태면 회원 식별자 (관리자 페이지에서 닉네임으로 보여 줌), 아니면 ''
 // 5년이 지난 기록은 관리자 페이지를 열 때 지웁니다 (adminService.purgeOldVisits).
 // expireAt 은 나중에 유료 요금제에서 Firestore TTL 정책을 켤 때를 위한 값입니다.
 // 브라우저에서 화면이 바뀔 때마다 한 건씩 남깁니다. 검색 로봇·자동화 도구는 남기지 않습니다.
@@ -143,7 +144,7 @@ function getSession() {
   return sessionMeta
 }
 
-export async function trackPageView(path, { signedIn = false } = {}) {
+export async function trackPageView(path, { uid = '' } = {}) {
   if (!db || import.meta.env.DEV) return
   if (path.startsWith('/admin')) return
   if (storage('local')?.getItem(NO_TRACK_KEY) === '1') return
@@ -170,7 +171,8 @@ export async function trackPageView(path, { signedIn = false } = {}) {
     country: guessCountry(tz, lang),
     ...deviceInfo(ua),
     app: Boolean(window.Capacitor?.isNativePlatform?.()),
-    signedIn: Boolean(signedIn),
+    signedIn: Boolean(uid),
+    uid: cut(uid, 128),
     expireAt: Timestamp.fromMillis(Date.now() + 5 * 365 * 24 * 3600 * 1000),
   }
   // 같은 세션의 다음 화면부터는 첫 방문/첫 화면이 아닙니다.
