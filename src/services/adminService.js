@@ -1,5 +1,5 @@
 // 관리자: admins/{uid} 문서가 있는 계정만 관리자입니다 (문서는 scripts/migrate/set-admin.mjs 로 만듭니다).
-import { collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, where } from 'firebase/firestore/lite'
+import { collection, deleteDoc, doc, getCount, getDoc, getDocs, limit, orderBy, query, where } from 'firebase/firestore/lite'
 import { db } from '../firebase/config'
 
 export async function isAdmin(uid) {
@@ -26,4 +26,19 @@ export async function purgeOldVisits() {
   const docs = (await getDocs(q)).docs
   await Promise.all(docs.map((d) => deleteDoc(d.ref)))
   return docs.length
+}
+
+// 회원 목록: members(로그인 기록) + users(공개 프로필) + 레슨 수. 가입일 최신순.
+export async function listMembers() {
+  const members = (await getDocs(collection(db, 'members'))).docs.map((d) => ({ uid: d.id, ...d.data() }))
+  const rows = await Promise.all(
+    members.map(async (m) => {
+      const [profile, lessons] = await Promise.all([
+        getDoc(doc(db, 'users', m.uid)).then((s) => (s.exists() ? s.data() : null)),
+        getCount(query(collection(db, 'lessons'), where('uid', '==', m.uid))).then((c) => c.data().count).catch(() => 0),
+      ])
+      return { ...m, legacy: m.uid.startsWith('legacy-'), nickname: profile?.nickname ?? '', intro: profile?.intro ?? '', lessons }
+    }),
+  )
+  return rows.sort((a, b) => b.joinedAt - a.joinedAt)
 }

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { subscribeAuth } from '../services/authService'
+import { touchMember } from '../services/memberService'
 import { getProfile } from '../services/profileService'
 
 // user: 로그인 사용자 (없으면 null)
@@ -19,6 +20,7 @@ export function AuthProvider({ children }) {
         setUser(u)
         let p = null
         if (u) {
+          touchMember(u)
           try {
             p = await getProfile(u.uid)
           } catch (e) {

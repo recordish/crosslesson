@@ -2,7 +2,7 @@
 //   1) 본인 확인 (Google 계정 다시 고르기)
 //   2) 내가 보낸 신청, 내 레슨에 온 신청
 //   3) 내 레슨
-//   4) 프로필 (users/{uid})
+//   4) 프로필 (users/{uid}), 회원 기록 (members/{uid})
 //   5) 로그인 계정 (Firebase Authentication)
 // 레슨 번호 카운터는 그대로 둡니다 (번호는 다시 쓰지 않음).
 import { doc, deleteDoc } from 'firebase/firestore/lite'
@@ -38,6 +38,7 @@ export async function deleteAccount(user, onStep = () => {}) {
 
   onStep('프로필 지우는 중…')
   await deleteDoc(doc(db, 'users', user.uid))
+  await deleteDoc(doc(db, 'members', user.uid))
 
   onStep('계정 지우는 중…')
   await deleteCurrentUser()

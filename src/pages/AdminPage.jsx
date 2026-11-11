@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTitle } from '../hooks/useTitle'
-import { isAdmin, listVisits, MAX_VISITS, purgeOldVisits } from '../services/adminService'
+import { isAdmin, listMembers, listVisits, MAX_VISITS, purgeOldVisits } from '../services/adminService'
 import { setNoTrack } from '../services/analytics'
 
 const PERIODS = [
@@ -129,13 +130,17 @@ function Table({ title, rows, total, unit = '방문', limit = 10 }) {
   )
 }
 
+const TABS = [
+  { key: 'visits', label: '접속 기록' },
+  { key: 'members', label: '회원' },
+]
+
 export default function AdminPage() {
   useTitle('관리자')
   const { user } = useAuth()
   const [allowed, setAllowed] = useState(null)
-  const [period, setPeriod] = useState('7')
-  const [visits, setVisits] = useState(null)
-  const [error, setError] = useState('')
+  const [params, setParams] = useSearchParams()
+  const tab = params.get('tab') === 'members' ? 'members' : 'visits'
 
   useEffect(() => {
     let alive = true
@@ -152,8 +157,30 @@ export default function AdminPage() {
     }
   }, [user?.uid])
 
+  if (allowed === null) return <p className="empty">확인하는 중…</p>
+  if (!allowed) return <p className="empty">이 페이지를 볼 권한이 없어요.</p>
+
+  return (
+    <div className="admin">
+      <nav className="admin-tabs">
+        {TABS.map((t) => (
+          <button key={t.key} type="button" className={tab === t.key ? 'on' : ''}
+            onClick={() => setParams(t.key === 'visits' ? {} : { tab: t.key }, { replace: true })}>
+            {t.label}
+          </button>
+        ))}
+      </nav>
+      {tab === 'members' ? <MembersView /> : <VisitsView />}
+    </div>
+  )
+}
+
+function VisitsView() {
+  const [period, setPeriod] = useState('7')
+  const [visits, setVisits] = useState(null)
+  const [error, setError] = useState('')
+
   useEffect(() => {
-    if (!allowed) return
     let alive = true
     setVisits(null)
     setError('')
@@ -166,18 +193,15 @@ export default function AdminPage() {
     return () => {
       alive = false
     }
-  }, [allowed, period])
+  }, [period])
 
   const s = useMemo(() => (visits ? summarize(visits) : null), [visits])
-
-  if (allowed === null) return <p className="empty">확인하는 중…</p>
-  if (!allowed) return <p className="empty">이 페이지를 볼 권한이 없어요.</p>
 
   const total = s?.sessions.length ?? 0
   const maxDay = Math.max(1, ...(s?.days.map((d) => d[1]) ?? [1]))
 
   return (
-    <div className="admin">
+    <>
       <div className="admin-head">
         <h1>접속 기록</h1>
         <div className="admin-periods" role="tablist">
@@ -262,6 +286,90 @@ export default function AdminPage() {
           </section>
         </>
       )}
-    </div>
+    </>
+  )
+}
+
+const fmtDate = (t) => (t ? new Date(t).toLocaleDateString('ko-KR', { year: '2-digit', month: 'numeric', day: 'numeric' }) : '-')
+const fmtDateTime = (t) =>
+  t ? new Date(t).toLocaleString('ko-KR', { year: '2-digit', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'
+const DAY = 24 * 3600 * 1000
+
+function MembersView() {
+  const [rows, setRows] = useState(null)
+  const [error, setError] = useState('')
+  const [kind, setKind] = useState('new')
+
+  useEffect(() => {
+    let alive = true
+    listMembers()
+      .then((r) => alive && setRows(r))
+      .catch((e) => {
+        console.error(e)
+        if (alive) setError('회원 목록을 불러오지 못했어요.')
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  const now = Date.now()
+  const fresh = rows?.filter((r) => !r.legacy) ?? []
+  const returning = rows?.filter((r) => r.legacy) ?? []
+  const shown = kind === 'new' ? fresh : returning
+
+  return (
+    <>
+      <div className="admin-head">
+        <h1>회원</h1>
+        <div className="admin-periods">
+          <button type="button" className={kind === 'new' ? 'chip on' : 'chip'} onClick={() => setKind('new')}>신규 가입</button>
+          <button type="button" className={kind === 'legacy' ? 'chip on' : 'chip'} onClick={() => setKind('legacy')}>돌아온 기존 회원</button>
+        </div>
+      </div>
+      <p className="muted admin-note">
+        새 사이트에서 Google로 처음 로그인한 계정이 신규 가입이에요. 예전 사이트에서 옮겨 온 회원이 다시 로그인하면 &lsquo;돌아온 기존 회원&rsquo;에 보여요.
+        이메일은 관리자만 볼 수 있어요.
+      </p>
+      {error && <p className="error">{error}</p>}
+      {!rows && !error && <p className="empty">불러오는 중…</p>}
+      {rows && (
+        <>
+          <div className="admin-stats">
+            <div><strong>{fresh.length.toLocaleString()}</strong><span>신규 가입 (전체)</span></div>
+            <div><strong>{fresh.filter((r) => r.joinedAt >= now - 7 * DAY).length}</strong><span>최근 7일 가입</span></div>
+            <div><strong>{fresh.filter((r) => r.joinedAt >= now - 30 * DAY).length}</strong><span>최근 30일 가입</span></div>
+            <div><strong>{fresh.filter((r) => !r.nickname).length}</strong><span>닉네임 미설정</span></div>
+            <div><strong>{returning.length.toLocaleString()}</strong><span>돌아온 기존 회원</span></div>
+          </div>
+          <section className="admin-card">
+            <h2>{kind === 'new' ? '신규 가입자' : '돌아온 기존 회원'} ({shown.length})</h2>
+            {shown.length === 0 ? (
+              <p className="muted">아직 없어요.</p>
+            ) : (
+              <div className="table-wrap">
+                <table className="admin-recent">
+                  <thead>
+                    <tr><th>가입일</th><th>닉네임</th><th>이메일</th><th>최근 로그인</th><th>레슨</th><th>소개</th></tr>
+                  </thead>
+                  <tbody>
+                    {shown.map((r) => (
+                      <tr key={r.uid}>
+                        <td>{fmtDate(r.joinedAt)}</td>
+                        <td>{r.nickname || <span className="muted">미설정</span>}</td>
+                        <td>{r.email ? <a href={`mailto:${r.email}`}>{r.email}</a> : '-'}</td>
+                        <td>{fmtDateTime(r.lastLoginAt)}</td>
+                        <td>{r.lessons}</td>
+                        <td className="admin-intro">{r.intro || ''}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        </>
+      )}
+    </>
   )
 }
