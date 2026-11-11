@@ -205,7 +205,7 @@ function AdminNav() {
   function go(id) {
     const el = document.getElementById(id)
     if (!el) return
-    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - top - 56, behavior: 'smooth' })
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - top - 56, behavior: 'instant' })
   }
 
   return (
