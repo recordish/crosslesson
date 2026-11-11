@@ -154,10 +154,68 @@ export default function AdminPage() {
 
   return (
     <div className="admin">
-      <MembersView />
+      <AdminNav />
+      <section id="admin-members" className="admin-section">
+        <MembersView />
+      </section>
       <hr className="admin-divider" />
-      <VisitsView />
+      <section id="admin-visits" className="admin-section">
+        <VisitsView />
+      </section>
     </div>
+  )
+}
+
+const NAV = [
+  { id: 'admin-members', label: '회원' },
+  { id: 'admin-visits', label: '방문 요약' },
+  { id: 'admin-sources', label: '유입·환경' },
+  { id: 'admin-recent', label: '최근 방문' },
+]
+
+// 화면 위에 붙는 메뉴: 누르면 그 영역으로 이동하고, 지금 보고 있는 영역을 표시합니다.
+function AdminNav() {
+  const [active, setActive] = useState(NAV[0].id)
+  const [top, setTop] = useState(0)
+
+  useEffect(() => {
+    const header = document.querySelector('.header')
+    const update = () => setTop(header?.offsetHeight ?? 0)
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
+  useEffect(() => {
+    const onScroll = () => {
+      const line = top + 70
+      let current = NAV[0].id
+      for (const n of NAV) {
+        const el = document.getElementById(n.id)
+        if (el && el.getBoundingClientRect().top <= line) current = n.id
+      }
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) current = NAV.at(-1).id
+      setActive(current)
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [top])
+
+  function go(id) {
+    const el = document.getElementById(id)
+    if (!el) return
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - top - 56, behavior: 'smooth' })
+  }
+
+  return (
+    <nav className="admin-tabs" style={{ top }}>
+      {NAV.map((n) => (
+        <button key={n.id} type="button" className={active === n.id ? 'on' : ''} onClick={() => go(n.id)}>
+          {n.label}
+        </button>
+      ))}
+    </nav>
   )
 }
 
@@ -233,7 +291,7 @@ function VisitsView() {
             </section>
           )}
 
-          <div className="admin-grid">
+          <div className="admin-grid" id="admin-sources">
             <Table title="유입 채널" rows={s.channels} total={total} />
             <Table title="유입 출처" rows={s.sources} total={total} />
             <Table title="들어온 페이지(외부 링크)" rows={s.refPages} total={total} />
@@ -247,7 +305,7 @@ function VisitsView() {
             <Table title="브라우저" rows={s.browsers} total={total} />
           </div>
 
-          <section className="admin-card">
+          <section className="admin-card" id="admin-recent">
             <h2>최근 방문</h2>
             <div className="table-wrap">
               <table className="admin-recent">
