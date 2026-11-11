@@ -428,3 +428,6 @@ button.link.danger { color: var(--danger); padding-left: 0; }
 .card-row { margin: 0; display: flex; align-items: center; gap: 10px; min-width: 0; white-space: nowrap; }
 .card-ellipsis { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .card-age { flex: none; }
+.card-row { font-size: 13px; color: var(--muted); }
+.card-meta { flex-wrap: nowrap; white-space: nowrap; min-width: 0; }
+.card-schedule { margin-left: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }

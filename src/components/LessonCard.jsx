@@ -13,21 +13,17 @@ export default function LessonCard({ lesson, now, preview = false }) {
         {lesson.closed && <span className="tag">모집 완료</span>}
       </div>
       <p className="card-content">{lesson.content || <span className="muted">소개 글이 여기에 보여요.</span>}</p>
-      <div className="card-info">
-        <p className="card-row">
-          <span className={lesson.online ? 'mode online' : 'mode'}>{modeLabel(lesson)}</span>
-          {place && <span className="card-ellipsis">📍 {place}</span>}
-        </p>
-        <p className="card-row">
-          <span className="card-ellipsis">🕒 {scheduleLabel(lesson.days, lesson.timeSlots)}</span>
-          <span className="card-age">👤 {ageGroupsLabel(lesson)}</span>
-        </p>
-      </div>
+      <p className="card-row">
+        <span className={lesson.online ? 'mode online' : 'mode'}>{modeLabel(lesson)}</span>
+        {place && <span className="card-ellipsis">📍 {place}</span>}
+        <span className="card-age">👤 {ageGroupsLabel(lesson)}</span>
+      </p>
       <p className="card-meta">
         <time dateTime={new Date(lesson.createdAt).toISOString()} title={fullDateTime(lesson.createdAt)}>
           {relativeTime(lesson.createdAt, now)}
         </time>
         <span>조회 {lesson.views.toLocaleString()}</span>
+        <span className="card-schedule">🕒 {scheduleLabel(lesson.days, lesson.timeSlots)}</span>
       </p>
     </>
   )
