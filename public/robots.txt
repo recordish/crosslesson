@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /me
+Disallow: /new
+Disallow: /profile
+Disallow: /login
+Disallow: /lesson/*/edit
+
+Sitemap: https://crosslesson.com/sitemap.xml
