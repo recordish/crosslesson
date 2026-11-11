@@ -433,3 +433,8 @@ button.link.danger { color: var(--danger); padding-left: 0; }
 .card-schedule { margin-left: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .card-age { display: inline-flex; align-items: center; gap: 3px; }
 .icon-person { width: 12px; height: 12px; fill: color-mix(in srgb, var(--muted) 45%, transparent); flex: none; }
+/* 카드 안의 한 줄 정보가 길어도 카드가 화면 밖으로 늘어나지 않게 */
+.lesson-grid > li, .card, .card-link { min-width: 0; }
+.card-row, .card-meta { overflow: hidden; }
+.card-meta > span, .card-meta > time { flex: none; }
+.card-meta > .card-schedule { flex: 0 1 auto; }
