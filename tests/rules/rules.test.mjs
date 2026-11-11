@@ -17,7 +17,7 @@ async function t(name, p) {
 const now = Date.now()
 const lessonData = (no, uid, extra = {}) => ({ no, uid, authorName: '에이유저', teach: 204, learns: [306], teachLevel: 'pro', learnLevel: '',
   online: false, offline: true, sido: '경기', region: '오리역', days: ['sat', 'sun'], timeSlots: ['evening'],
-  ageMin: 20, ageMax: 45, content: '바이올린 가르쳐 드려요, 영상편집 배우고 싶어요', closed: false, views: 0, createdAt: now, updatedAt: now, ...extra })
+  ageGroups: ['20s', '30s'], ageMin: null, ageMax: null, content: '바이올린 가르쳐 드려요, 영상편집 배우고 싶어요', closed: false, views: 0, createdAt: now, updatedAt: now, ...extra })
 
 async function createLesson(db, uid, override = {}) {
   return runTransaction(db, async (tx) => {
@@ -56,6 +56,9 @@ await t('lesson: learns bad code denied', assertFails(createLesson(B, 'userB', {
 await t('lesson: neither online nor offline denied', assertFails(createLesson(B, 'userB', { online: false, offline: false })))
 await t('lesson: online-only with sido denied', assertFails(createLesson(B, 'userB', { online: true, offline: false, sido: '서울' })))
 await t('lesson: sido 온라인 denied (now a mode)', assertFails(createLesson(B, 'userB', { sido: '온라인' })))
+await t('lesson: no ageGroups denied', assertFails(createLesson(B, 'userB', { ageGroups: [] })))
+await t('lesson: bad ageGroup denied', assertFails(createLesson(B, 'userB', { ageGroups: ['60s'] })))
+await t('lesson: duplicate ageGroup denied', assertFails(createLesson(B, 'userB', { ageGroups: ['20s', '20s'] })))
 await t('lesson: bad day denied', assertFails(createLesson(B, 'userB', { days: ['mon', 'holiday'] })))
 await t('lesson: duplicate day denied', assertFails(createLesson(B, 'userB', { days: ['mon', 'mon'] })))
 await t('lesson: bad time slot denied', assertFails(createLesson(B, 'userB', { timeSlots: ['night'] })))
@@ -106,6 +109,10 @@ await t('app: B re-applies', assertSucceeds(setDoc(doc(B, 'applications/1_userB'
 await t('app: lesson owner can delete received (account deletion)', assertSucceeds(deleteDoc(doc(A, 'applications/1_userB'))))
 await t('profile: own delete', assertSucceeds(deleteDoc(doc(B, 'users/userB'))))
 await t('profile: other delete denied', assertFails(deleteDoc(doc(B, 'users/userA'))))
+
+// 예전 글(나이대 없음, 숫자 범위): 작성자가 모집 완료로 바꿀 수 있어야 함
+await env.withSecurityRulesDisabled((c) => setDoc(doc(c.firestore(), 'lessons/900'), (() => { const d = lessonData(900, 'userA', { ageMin: 20, ageMax: 45 }); delete d.ageGroups; return d })()))
+await t('lesson: legacy (no ageGroups) close ok', assertSucceeds(updateDoc(doc(A, 'lessons/900'), { closed: true, updatedAt: Date.now() })))
 
 // admins / visits
 const visit = (extra = {}) => ({ t: Date.now(), vid: 'v1', sid: 's1', entry: true, newVisitor: true, path: '/', ref: 'google.com',

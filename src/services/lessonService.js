@@ -3,7 +3,7 @@
 //   lessons/{no}        { no, uid, authorName,
 //                         teach, learns[1~3], teachLevel, learnLevel,       ← 교환할 과목과 수준
 //                         online, offline, sido, region,                     ← 수업 방식과 장소
-//                         days[], timeSlots[], ageMin, ageMax,               ← 가능한 시간, 나이대
+//                         days[], timeSlots[], ageGroups[], ageMin, ageMax,  ← 가능한 시간, 나이대(ageMin/Max 는 예전 글)
 //                         content, closed, views, createdAt, updatedAt }
 //   counters/lessons    { last }  ← 마지막 레슨 번호. 새 레슨은 last + 1 번 (예전 번호를 이어감)
 // 로컬 모드: localDb (같은 모양)
@@ -23,7 +23,7 @@ import {
   where,
 } from 'firebase/firestore/lite'
 import { db } from '../firebase/config'
-import { DAYS, LEARN_LEVELS, MAX_LEARNS, ordered, TEACH_LEVELS, TIME_SLOTS } from '../data/lessonOptions'
+import { AGE_GROUPS, DAYS, LEARN_LEVELS, MAX_LEARNS, ordered, TEACH_LEVELS, TIME_SLOTS } from '../data/lessonOptions'
 import { delay, readDb, writeDb } from './localDb'
 
 export const PAGE_SIZE = 20
@@ -54,6 +54,7 @@ export function normalizeLesson(l) {
     offline: hasMode ? Boolean(l.offline) : true,
     days: Array.isArray(l.days) ? l.days : [],
     timeSlots: Array.isArray(l.timeSlots) ? l.timeSlots : [],
+    ageGroups: Array.isArray(l.ageGroups) ? l.ageGroups : [],
   }
 }
 
@@ -79,8 +80,9 @@ export function pickFields(f) {
     region: f.region.trim(),
     days: ordered(DAYS, f.days),
     timeSlots: ordered(TIME_SLOTS, f.timeSlots),
-    ageMin: f.ageMin,
-    ageMax: f.ageMax,
+    ageGroups: ordered(AGE_GROUPS, f.ageGroups ?? []),
+    ageMin: f.ageMin ?? null,
+    ageMax: f.ageMax ?? null,
     content: f.content.trim(),
     closed: Boolean(f.closed),
   }

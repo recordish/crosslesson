@@ -6,6 +6,7 @@ import LessonCard from '../components/LessonCard'
 import { useAuth } from '../contexts/AuthContext'
 import { categoryName, SIDO } from '../data/categories'
 import {
+  AGE_GROUPS,
   DAYS,
   LEARN_LEVELS,
   MAX_LEARNS,
@@ -32,7 +33,7 @@ const EMPTY = {
   teach: 0, learns: [], teachLevel: '', learnLevel: '',
   mode: 'offline', sido: '', region: '',
   days: [], timeSlots: [],
-  anyAge: true, ageMin: '', ageMax: '',
+  ageGroups: [],
   content: '', closed: false,
 }
 
@@ -48,7 +49,6 @@ const CONTACT_PATTERNS = [
 ]
 const looksLikeContact = (text) => CONTACT_PATTERNS.some((re) => re.test(text))
 
-const toAge = (v) => (v === '' || v == null ? null : Number(v))
 const draftKey = (uid) => `crosslesson:draft:${uid}`
 
 function template(form) {
@@ -69,8 +69,9 @@ function toFields(form) {
   return pickFields({
     ...form,
     ...modeFlags(form.mode),
-    ageMin: form.anyAge ? null : toAge(form.ageMin),
-    ageMax: form.anyAge ? null : toAge(form.ageMax),
+    // 나이대를 고르면 예전 숫자 범위(ageMin/ageMax)는 지웁니다.
+    ageMin: null,
+    ageMax: null,
   })
 }
 
@@ -78,14 +79,7 @@ function validate(form) {
   const errors = {}
   if (!form.teach) errors.teach = '가르쳐 줄 수 있는 과목을 골라 주세요.'
   if (form.learns.length === 0) errors.learns = '배우고 싶은 과목을 하나 이상 골라 주세요.'
-  if (!form.anyAge) {
-    const min = toAge(form.ageMin)
-    const max = toAge(form.ageMax)
-    const bad = (a) => a != null && (!Number.isInteger(a) || a < 10 || a > 99)
-    if (min == null && max == null) errors.ages = '나이를 적거나 "나이 무관"을 체크해 주세요.'
-    else if (bad(min) || bad(max)) errors.ages = '나이는 10에서 99 사이 숫자로 적어 주세요.'
-    else if (min != null && max != null && min > max) errors.ages = '앞 숫자가 뒤 숫자보다 클 수 없어요.'
-  }
+  if (!form.ageGroups?.length) errors.ages = '희망 나이대를 하나 이상 골라 주세요.'
   const length = form.content.trim().length
   if (length < CONTENT_MIN) errors.content = `소개를 ${CONTENT_MIN}자 이상 적어 주세요. (지금 ${length}자)`
   return errors
@@ -124,9 +118,7 @@ export default function LessonFormPage() {
         ...l,
         teach: l.teach ?? 0,
         mode: modeOf(l),
-        anyAge: l.ageMin == null && l.ageMax == null,
-        ageMin: l.ageMin ?? '',
-        ageMax: l.ageMax ?? '',
+        ageGroups: l.ageGroups ?? [],
       }
       setForm(loaded)
       setInitial(loaded)
@@ -352,19 +344,8 @@ export default function LessonFormPage() {
         </div>
 
         <div className="field" id="field-ages" tabIndex={-1}>
-          <span className="label">희망 나이대</span>
-          <label className="check">
-            <input type="checkbox" checked={form.anyAge} onChange={(e) => set('anyAge')(e.target.checked)} />
-            나이 무관
-          </label>
-          {!form.anyAge && (
-            <div className="ages">
-              <input type="number" inputMode="numeric" min="10" max="99" aria-label="최소 나이" placeholder="20" value={form.ageMin} onChange={(e) => set('ageMin')(e.target.value)} aria-invalid={Boolean(errors.ages)} />
-              <span>~</span>
-              <input type="number" inputMode="numeric" min="10" max="99" aria-label="최대 나이" placeholder="40" value={form.ageMax} onChange={(e) => set('ageMax')(e.target.value)} aria-invalid={Boolean(errors.ages)} />
-              <span>세</span>
-            </div>
-          )}
+          <span className="label">희망 나이대 <span className="muted small">(필수 · 여러 개 선택)</span></span>
+          <ChipGroup label="희망 나이대" options={AGE_GROUPS} value={form.ageGroups} onChange={set('ageGroups')} multiple />
           <FieldError message={errors.ages} />
         </div>
       </fieldset>

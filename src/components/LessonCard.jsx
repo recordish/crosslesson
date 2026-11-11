@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ageLabel } from '../data/categories'
-import { modeLabel, scheduleLabel } from '../data/lessonOptions'
+import { ageGroupsLabel, modeLabel, scheduleLabel } from '../data/lessonOptions'
 import { fullDateTime, relativeTime } from '../utils/relativeTime'
 import { ExchangeBadges } from './CategoryBadge'
 
@@ -14,12 +13,16 @@ export default function LessonCard({ lesson, now, preview = false }) {
         {lesson.closed && <span className="tag">모집 완료</span>}
       </div>
       <p className="card-content">{lesson.content || <span className="muted">소개 글이 여기에 보여요.</span>}</p>
-      <p className="card-place">
-        <span className={lesson.online ? 'mode online' : 'mode'}>{modeLabel(lesson)}</span>
-        {place && <span>📍 {place}</span>}
-        <span>🕒 {scheduleLabel(lesson.days, lesson.timeSlots)}</span>
-        <span>{ageLabel(lesson.ageMin, lesson.ageMax)}</span>
-      </p>
+      <div className="card-info">
+        <p className="card-row">
+          <span className={lesson.online ? 'mode online' : 'mode'}>{modeLabel(lesson)}</span>
+          {place && <span className="card-ellipsis">📍 {place}</span>}
+        </p>
+        <p className="card-row">
+          <span className="card-ellipsis">🕒 {scheduleLabel(lesson.days, lesson.timeSlots)}</span>
+          <span className="card-age">👤 {ageGroupsLabel(lesson)}</span>
+        </p>
+      </div>
       <p className="card-meta">
         <time dateTime={new Date(lesson.createdAt).toISOString()} title={fullDateTime(lesson.createdAt)}>
           {relativeTime(lesson.createdAt, now)}

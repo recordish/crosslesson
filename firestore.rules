@@ -28,6 +28,7 @@ service cloud.firestore {
     function isTimeSlots(v) { return isSubset(v, ['morning', 'afternoon', 'evening']); }
     function isTeachLevel(v) { return v in ['', 'hobby', 'skilled', 'pro']; }
     function isLearnLevel(v) { return v in ['', 'beginner', 'basic', 'intermediate']; }
+    function isAgeGroups(v) { return isSubset(v, ['20s', '30s', '40s', '50s']); }
 
     // ---------- 회원 프로필 ----------
     // 누구나 읽을 수 있고(닉네임·소개), 본인만 씁니다.
@@ -61,7 +62,7 @@ service cloud.firestore {
       function counterPath() { return /databases/$(database)/documents/counters/lessons; }
       function lessonKeys() {
         return ['no', 'uid', 'authorName', 'teach', 'learns', 'teachLevel', 'learnLevel',
-                'online', 'offline', 'sido', 'region', 'days', 'timeSlots', 'ageMin', 'ageMax',
+                'online', 'offline', 'sido', 'region', 'days', 'timeSlots', 'ageGroups', 'ageMin', 'ageMax',
                 'content', 'closed', 'views', 'createdAt', 'updatedAt'];
       }
       function editable(d) {
@@ -73,6 +74,7 @@ service cloud.firestore {
           && isSido(d.sido) && (d.offline || d.sido == '')
           && isStr(d.region, 0, 40)
           && isDays(d.days) && isTimeSlots(d.timeSlots)
+          && isAgeGroups(d.get('ageGroups', []))
           && isAge(d.ageMin) && isAge(d.ageMax)
           && (d.ageMin == null || d.ageMax == null || d.ageMin <= d.ageMax)
           && isStr(d.content, 10, 3000)
@@ -92,6 +94,7 @@ service cloud.firestore {
         && getAfter(counterPath()).data.last == request.resource.data.no
         && request.resource.data.views == 0
         && isTime(request.resource.data.createdAt)
+        && request.resource.data.get('ageGroups', []).size() > 0
         && editable(request.resource.data);
 
       // 작성자 수정: 번호·작성자·조회수·작성일은 못 바꿉니다.

@@ -3,7 +3,8 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import ApplicationItem from '../components/ApplicationItem'
 import { ExchangeBadges } from '../components/CategoryBadge'
 import { useAuth } from '../contexts/AuthContext'
-import { ageLabel, categoryName } from '../data/categories'
+import { categoryName } from '../data/categories'
+import { ageGroupsLabel } from '../data/lessonOptions'
 import { LEARN_LEVELS, levelLabel, modeLabel, scheduleLabel, TEACH_LEVELS } from '../data/lessonOptions'
 import { useNow } from '../hooks/useNow'
 import { useTitle } from '../hooks/useTitle'
@@ -96,7 +97,7 @@ export default function LessonPage() {
         <div><dt>수업 방식</dt><dd>{modeLabel(lesson)}</dd></div>
         <div><dt>{lesson.offline ? '지역 · 장소' : '방법'}</dt><dd>{place || '협의'}</dd></div>
         <div><dt>가능한 시간</dt><dd>{scheduleLabel(lesson.days, lesson.timeSlots)}</dd></div>
-        <div><dt>나이대</dt><dd>{ageLabel(lesson.ageMin, lesson.ageMax)}</dd></div>
+        <div><dt>나이대</dt><dd>{ageGroupsLabel(lesson)}</dd></div>
         <div>
           <dt>등록</dt>
           <dd title={fullDateTime(lesson.createdAt)}>{relativeTime(lesson.createdAt, now)}</dd>

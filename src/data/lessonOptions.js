@@ -57,3 +57,20 @@ export function scheduleLabel(days = [], slots = []) {
   const s = ordered(TIME_SLOTS, slots).map((x) => TIME_SLOTS.find(([v]) => v === x)[1]).join(' · ')
   return [daysLabel(days), s].filter(Boolean).join(' ') || '시간 협의'
 }
+
+// 희망 나이대 (여러 개, 꼭 하나 이상). 예전 글은 ageMin/ageMax(숫자 범위)로 저장돼 있습니다.
+export const AGE_GROUPS = [
+  ['20s', '20대'],
+  ['30s', '30대'],
+  ['40s', '40대'],
+  ['50s', '50대'],
+]
+export function ageGroupsLabel(lesson) {
+  const groups = AGE_GROUPS.filter(([v]) => (lesson.ageGroups ?? []).includes(v)).map(([, t]) => t)
+  if (groups.length) return groups.join(' · ')
+  const { ageMin: min, ageMax: max } = lesson
+  if (min == null && max == null) return '나이 무관'
+  if (min == null) return `~${max}세`
+  if (max == null) return `${min}세~`
+  return `${min}-${max}세`
+}

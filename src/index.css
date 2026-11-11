@@ -423,3 +423,8 @@ button.link.danger { color: var(--danger); padding-left: 0; }
   .members .c-intro { order: 6; flex-basis: 100%; max-width: none; color: var(--muted); }
   .members .c-intro:empty { display: none; }
 }
+/* 레슨 카드 정보: 1줄 방식·장소, 2줄 시간·나이대 (줄바꿈 없이, 길면 말줄임) */
+.card-info { display: flex; flex-direction: column; gap: 6px; margin: 0; font-size: 13px; color: var(--muted); }
+.card-row { margin: 0; display: flex; align-items: center; gap: 10px; min-width: 0; white-space: nowrap; }
+.card-ellipsis { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.card-age { flex: none; }
