@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useTitle } from '../hooks/useTitle'
 import { isAdmin, listMembers, listVisits, MAX_VISITS, purgeOldVisits } from '../services/adminService'
@@ -130,17 +129,10 @@ function Table({ title, rows, total, unit = '방문', limit = 10 }) {
   )
 }
 
-const TABS = [
-  { key: 'visits', label: '접속 기록' },
-  { key: 'members', label: '회원' },
-]
-
 export default function AdminPage() {
   useTitle('관리자')
   const { user } = useAuth()
   const [allowed, setAllowed] = useState(null)
-  const [params, setParams] = useSearchParams()
-  const tab = params.get('tab') === 'members' ? 'members' : 'visits'
 
   useEffect(() => {
     let alive = true
@@ -162,15 +154,9 @@ export default function AdminPage() {
 
   return (
     <div className="admin">
-      <nav className="admin-tabs">
-        {TABS.map((t) => (
-          <button key={t.key} type="button" className={tab === t.key ? 'on' : ''}
-            onClick={() => setParams(t.key === 'visits' ? {} : { tab: t.key }, { replace: true })}>
-            {t.label}
-          </button>
-        ))}
-      </nav>
-      {tab === 'members' ? <MembersView /> : <VisitsView />}
+      <MembersView />
+      <hr className="admin-divider" />
+      <VisitsView />
     </div>
   )
 }
