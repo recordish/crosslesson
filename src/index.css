@@ -431,3 +431,5 @@ button.link.danger { color: var(--danger); padding-left: 0; }
 .card-row { font-size: 13px; color: var(--muted); }
 .card-meta { flex-wrap: nowrap; white-space: nowrap; min-width: 0; }
 .card-schedule { margin-left: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.card-age { display: inline-flex; align-items: center; gap: 3px; }
+.icon-person { width: 12px; height: 12px; fill: color-mix(in srgb, var(--muted) 45%, transparent); flex: none; }

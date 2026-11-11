@@ -16,7 +16,13 @@ export default function LessonCard({ lesson, now, preview = false }) {
       <p className="card-row">
         <span className={lesson.online ? 'mode online' : 'mode'}>{modeLabel(lesson)}</span>
         {place && <span className="card-ellipsis">📍 {place}</span>}
-        <span className="card-age">👤 {ageGroupsLabel(lesson)}</span>
+        <span className="card-age">
+          <svg className="icon-person" viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="8" cy="5" r="3" />
+            <path d="M2 14.5c0-3.2 2.7-5 6-5s6 1.8 6 5z" />
+          </svg>
+          {ageGroupsLabel(lesson)}
+        </span>
       </p>
       <p className="card-meta">
         <time dateTime={new Date(lesson.createdAt).toISOString()} title={fullDateTime(lesson.createdAt)}>
