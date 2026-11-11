@@ -176,8 +176,8 @@ export default function AdminPage() {
 const NAV = [
   { id: 'admin-members', label: '회원' },
   { id: 'admin-visits', label: '방문 요약' },
-  { id: 'admin-sources', label: '유입·환경' },
   { id: 'admin-recent', label: '최근 방문' },
+  { id: 'admin-sources', label: '유입·환경' },
 ]
 
 // 화면 위에 붙는 메뉴: 누르면 그 영역으로 이동하고, 지금 보고 있는 영역을 표시합니다.
@@ -304,6 +304,39 @@ function VisitsView() {
             </section>
           )}
 
+          <section className="admin-card" id="admin-recent">
+            <h2>최근 방문</h2>
+            <div className="table-wrap">
+              <table className="admin-recent admin-stack recent">
+                <thead>
+                  <tr><th>시각</th><th>닉네임</th><th>유입</th><th>첫 화면</th><th>화면 수</th><th>국가</th><th>언어</th><th>기기</th></tr>
+                </thead>
+                <tbody>
+                  {[...s.sessions].reverse().slice(0, 50).map((v) => (
+                    <tr key={v.sid}>
+                      <td className="c-time">{new Date(v.t).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                      <td className="c-nick">
+                        {v.uid ? (
+                          <span className={v.uidGuess ? 'muted' : ''} title={v.uidGuess ? '같은 기기에서 로그인한 회원 (이 방문은 로그인 전)' : ''}>
+                            {nicknames[v.uid] ? displayName(nicknames[v.uid]) : '회원'}{v.uidGuess ? ' *' : ''}
+                          </span>
+                        ) : (
+                          <span className="muted">-</span>
+                        )}
+                      </td>
+                      <td className="c-src">{v.channel === v.detail ? v.channel : `${v.channel} · ${v.detail}`}</td>
+                      <td className="c-page">{pageName(v.path)}</td>
+                      <td className="c-pages">{v.pages}</td>
+                      <td className="c-meta">{v.country || '-'}</td>
+                      <td className="c-meta">{v.lang || '-'}</td>
+                      <td className="c-meta c-dev">{[DEVICE[v.device], v.os, v.browser].filter(Boolean).join(' · ')}{v.newVisitor ? ' · 첫 방문' : ''}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
           <div className="admin-grid" id="admin-sources">
             <Table title="유입 채널" rows={s.channels} total={total} />
             <Table title="유입 출처" rows={s.sources} total={total} />
@@ -317,39 +350,6 @@ function VisitsView() {
             <Table title="운영체제" rows={s.os} total={total} />
             <Table title="브라우저" rows={s.browsers} total={total} />
           </div>
-
-          <section className="admin-card" id="admin-recent">
-            <h2>최근 방문</h2>
-            <div className="table-wrap">
-              <table className="admin-recent">
-                <thead>
-                  <tr><th>시각</th><th>닉네임</th><th>유입</th><th>첫 화면</th><th>화면 수</th><th>국가</th><th>언어</th><th>기기</th></tr>
-                </thead>
-                <tbody>
-                  {[...s.sessions].reverse().slice(0, 50).map((v) => (
-                    <tr key={v.sid}>
-                      <td>{new Date(v.t).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
-                      <td>
-                        {v.uid ? (
-                          <span className={v.uidGuess ? 'muted' : ''} title={v.uidGuess ? '같은 기기에서 로그인한 회원 (이 방문은 로그인 전)' : ''}>
-                            {nicknames[v.uid] ? displayName(nicknames[v.uid]) : '회원'}{v.uidGuess ? ' *' : ''}
-                          </span>
-                        ) : (
-                          <span className="muted">-</span>
-                        )}
-                      </td>
-                      <td>{v.channel === v.detail ? v.channel : `${v.channel} · ${v.detail}`}</td>
-                      <td>{pageName(v.path)}</td>
-                      <td>{v.pages}</td>
-                      <td>{v.country || '-'}</td>
-                      <td>{v.lang || '-'}</td>
-                      <td>{[DEVICE[v.device], v.os, v.browser].filter(Boolean).join(' · ')}{v.newVisitor ? ' · 첫 방문' : ''}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
         </>
       )}
     </>
@@ -414,19 +414,19 @@ function MembersView() {
               <p className="muted">아직 없어요.</p>
             ) : (
               <div className="table-wrap">
-                <table className="admin-recent">
+                <table className="admin-recent admin-stack members">
                   <thead>
                     <tr><th>가입일</th><th>닉네임</th><th>이메일</th><th>최근 로그인</th><th>레슨</th><th>소개</th></tr>
                   </thead>
                   <tbody>
                     {shown.map((r) => (
                       <tr key={r.uid}>
-                        <td>{fmtDate(r.joinedAt)}</td>
-                        <td>{r.nickname || <span className="muted">미설정</span>}</td>
-                        <td>{r.email ? <a href={`mailto:${r.email}`}>{r.email}</a> : '-'}</td>
-                        <td>{fmtDateTime(r.lastLoginAt)}</td>
-                        <td>{r.lessons}</td>
-                        <td className="admin-intro">{r.intro || ''}</td>
+                        <td className="c-date">{fmtDate(r.joinedAt)}</td>
+                        <td className="c-nick">{r.nickname || <span className="muted">미설정</span>}</td>
+                        <td className="c-email">{r.email ? <a href={`mailto:${r.email}`}>{r.email}</a> : '-'}</td>
+                        <td className="c-login">{fmtDateTime(r.lastLoginAt)}</td>
+                        <td className="c-lessons">{r.lessons}</td>
+                        <td className="admin-intro c-intro">{r.intro || ''}</td>
                       </tr>
                     ))}
                   </tbody>

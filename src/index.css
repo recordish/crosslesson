@@ -392,3 +392,34 @@ button.link.danger { color: var(--danger); padding-left: 0; }
 .notify-setting input { margin-top: 3px; width: 18px; height: 18px; flex: none; }
 .notify-setting span { display: flex; flex-direction: column; gap: 2px; }
 .notify-setting small { color: var(--muted); font-size: 13px; word-break: break-all; }
+
+/* 관리자 표: 휴대폰에서는 가로 스크롤 없이 카드처럼 */
+@media (max-width: 640px) {
+  .admin-stack, .admin-stack tbody, .admin-stack tr, .admin-stack td { display: block; }
+  .admin-stack { white-space: normal; font-size: 13px; }
+  .admin-stack thead { display: none; }
+  .admin-stack tr { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .admin-stack tr:last-child { border-bottom: 0; }
+  .admin-stack td { padding: 0 !important; border: 0 !important; min-width: 0; word-break: break-all; }
+  /* 최근 방문: 시각·닉네임·화면 수 / 유입 / 첫 화면 / 국가·언어·기기 */
+  .recent .c-time { order: 1; color: var(--muted); }
+  .recent .c-nick { order: 2; flex: 1; font-weight: 600; }
+  .recent .c-pages { order: 3; color: var(--muted); }
+  .recent .c-pages::after { content: '화면'; margin-left: 2px; }
+  .recent .c-src { order: 4; flex-basis: 100%; }
+  .recent .c-page { order: 5; flex-basis: 100%; color: var(--muted); }
+  .recent .c-page::before { content: '첫 화면 '; }
+  .recent .c-meta { order: 6; color: var(--muted); font-size: 12px; margin-right: -4px; }
+  .recent .c-meta + .c-meta::before { content: '· '; }
+  /* 회원: 닉네임·가입일 / 이메일 / 최근 로그인·레슨 / 소개 */
+  .members .c-nick { order: 1; flex: 1; font-weight: 600; font-size: 14px; }
+  .members .c-date { order: 2; color: var(--muted); }
+  .members .c-date::before { content: '가입 '; }
+  .members .c-email { order: 3; flex-basis: 100%; }
+  .members .c-login { order: 4; color: var(--muted); }
+  .members .c-login::before { content: '최근 로그인 '; }
+  .members .c-lessons { order: 5; color: var(--muted); }
+  .members .c-lessons::before { content: '· 레슨 '; }
+  .members .c-intro { order: 6; flex-basis: 100%; max-width: none; color: var(--muted); }
+  .members .c-intro:empty { display: none; }
+}
