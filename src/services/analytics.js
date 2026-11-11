@@ -1,5 +1,5 @@
 // 접속 기록 (관리자 페이지 /admin 에서만 볼 수 있습니다)
-//   visits/{자동 ID} = { t, vid, sid, entry, newVisitor, path, ref, refPath, source, medium, campaign,
+//   visits/{자동 ID} = { t, vid, sid, entry, newVisitor, path, ref, refPath, keyword, source, medium, campaign,
 //                       lang, tz, country, device, os, browser, app, signedIn, uid, ua, expireAt }
 // ua: 분류하지 못한 방문(운영체제·브라우저 '기타', Linux PC)만 브라우저 식별 문자열 원문, 나머지는 ''
 // uid: 로그인한 상태면 회원 식별자 (관리자 페이지에서 닉네임으로 보여 줌), 아니면 ''
@@ -90,6 +90,7 @@ function deviceInfo(ua) {
   return { device: tablet ? 'tablet' : mobile ? 'mobile' : 'desktop', os, browser }
 }
 
+const SEARCH_HOST = /(^|\.)(google\.[a-z.]+|naver\.com|daum\.net|bing\.com|yahoo\.[a-z.]+|duckduckgo\.com|zum\.com|nate\.com|baidu\.com|yandex\.[a-z]+)$/i
 const cut = (v, n) => String(v ?? '').slice(0, n)
 
 let sessionMeta = null
@@ -118,12 +119,20 @@ function getSession() {
   const params = new URLSearchParams(location.search)
   let ref = ''
   let refPath = ''
+  let keyword = ''
   try {
     if (document.referrer) {
       const u = new URL(document.referrer)
       if (u.hostname !== location.hostname) {
         ref = u.hostname.replace(/^www\./, '')
         refPath = u.pathname
+        // 검색 사이트가 검색어를 넘겨 줄 때만 (대부분은 넘겨 주지 않음)
+        if (SEARCH_HOST.test(u.hostname)) {
+          for (const k of ['query', 'q', 'oquery', 'p', 'wd', 'keyword']) {
+            const v = u.searchParams.get(k)
+            if (v && v.trim()) { keyword = v.trim(); break }
+          }
+        }
       }
     }
   } catch { /* 무시 */ }
@@ -134,12 +143,13 @@ function getSession() {
     entry: true,
     ref: cut(ref, 100),
     refPath: cut(refPath, 200),
+    keyword: cut(keyword, 100),
     source: cut(params.get('utm_source'), 100),
     medium: cut(params.get('utm_medium'), 100),
     campaign: cut(params.get('utm_campaign'), 100),
   }
   try {
-    ss?.setItem(SID_KEY, JSON.stringify({ sid: sessionMeta.sid, ref: sessionMeta.ref, refPath: sessionMeta.refPath,
+    ss?.setItem(SID_KEY, JSON.stringify({ sid: sessionMeta.sid, ref: sessionMeta.ref, refPath: sessionMeta.refPath, keyword: sessionMeta.keyword,
       source: sessionMeta.source, medium: sessionMeta.medium, campaign: sessionMeta.campaign }))
   } catch { /* 무시 */ }
   return sessionMeta
@@ -164,6 +174,7 @@ export async function trackPageView(path, { uid = '' } = {}) {
     path: cut(path, 200),
     ref: s.ref,
     refPath: s.refPath,
+    keyword: s.keyword ?? '',
     source: s.source,
     medium: s.medium,
     campaign: s.campaign,

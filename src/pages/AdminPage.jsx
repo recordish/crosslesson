@@ -97,6 +97,7 @@ function summarize(visits) {
     devices: countBy(sessions, (s) => DEVICE[s.device] ?? s.device),
     os: countBy(sessions, (s) => s.os),
     browsers: countBy(sessions, (s) => s.browser),
+    keywords: countBy(sessions.filter((s) => s.keyword), (s) => `${s.keyword} (${s.detail})`),
     unknownUa: countBy(visits.filter((v) => v.ua), (v) => v.ua),
     platforms: countBy(sessions, (s) => (s.app ? '안드로이드 앱' : '웹')),
     signedIn: sessions.filter((s) => s.signedIn).length,
@@ -325,7 +326,7 @@ function VisitsView() {
                           <span className="muted">-</span>
                         )}
                       </td>
-                      <td className="c-src">{v.channel === v.detail ? v.channel : `${v.channel} · ${v.detail}`}</td>
+                      <td className="c-src">{v.channel === v.detail ? v.channel : `${v.channel} · ${v.detail}`}{v.keyword ? ` · "${v.keyword}"` : ''}</td>
                       <td className="c-page">{pageName(v.path)}</td>
                       <td className="c-pages">{v.pages}</td>
                       <td className="c-meta">{v.country || '-'}</td>
@@ -341,6 +342,7 @@ function VisitsView() {
           <div className="admin-grid" id="admin-sources">
             <Table title="유입 채널" rows={s.channels} total={total} />
             <Table title="유입 출처" rows={s.sources} total={total} />
+            <Table title="유입 검색어 (검색 사이트가 넘겨 준 것만)" rows={s.keywords} total={total} />
             <Table title="들어온 페이지(외부 링크)" rows={s.refPages} total={total} />
             <Table title="첫 화면" rows={s.entries} total={total} />
             <Table title="많이 본 화면" rows={s.pages} total={s.pageviews} unit="페이지뷰" />

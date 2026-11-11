@@ -188,7 +188,7 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow delete: if isAdmin() && resource.data.t < request.time.toMillis() - 157680000000;
       allow create: if request.resource.data.keys().hasOnly(['t', 'vid', 'sid', 'entry', 'newVisitor', 'path',
-             'ref', 'refPath', 'source', 'medium', 'campaign', 'lang', 'tz', 'country', 'device', 'os', 'browser',
+             'ref', 'refPath', 'keyword', 'source', 'medium', 'campaign', 'lang', 'tz', 'country', 'device', 'os', 'browser',
              'app', 'signedIn', 'uid', 'ua', 'expireAt'])
         && request.resource.data.t is int
         && request.resource.data.t > request.time.toMillis() - 600000
@@ -200,6 +200,7 @@ service cloud.firestore {
         && isStr(request.resource.data.path, 1, 200)
         && isStr(request.resource.data.ref, 0, 100)
         && isStr(request.resource.data.refPath, 0, 200)
+        && isStr(request.resource.data.get('keyword', ''), 0, 100)
         && isStr(request.resource.data.source, 0, 100)
         && isStr(request.resource.data.medium, 0, 100)
         && isStr(request.resource.data.campaign, 0, 100)
