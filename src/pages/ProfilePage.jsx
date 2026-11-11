@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTitle } from '../hooks/useTitle'
 import { logout } from '../services/authService'
 import { INTRO_MAX, NICKNAME_MAX, NICKNAME_MIN, saveProfile } from '../services/profileService'
+import { maskPhone } from '../data/displayName.js'
 
 const safeNext = (v) => (v && v.startsWith('/') && !v.startsWith('//') ? v : '/me')
 
@@ -12,7 +13,7 @@ export default function ProfilePage() {
   const { user, profile, setProfile } = useAuth()
   const navigate = useNavigate()
   const next = safeNext(useSearchParams()[0].get('next'))
-  const [nickname, setNickname] = useState(profile?.nickname ? profile.nickname.split('@')[0] : '')
+  const [nickname, setNickname] = useState(profile?.nickname && !maskPhone(profile.nickname) ? profile.nickname.split('@')[0] : '')
   const [intro, setIntro] = useState(profile?.intro ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -29,6 +30,10 @@ export default function ProfilePage() {
     }
     if (nickname.includes('@')) {
       setError('닉네임에는 이메일 주소나 @ 기호를 쓸 수 없어요.')
+      return
+    }
+    if (maskPhone(nickname)) {
+      setError('전화번호는 닉네임으로 쓸 수 없어요.')
       return
     }
     setSaving(true)

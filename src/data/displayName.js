@@ -1,6 +1,14 @@
-// 이메일이 그대로 닉네임이 된 이전 회원이 있어, 화면에는 '@' 앞부분만 보여 줍니다.
+// 화면에 보이는 이름: 이메일이면 '@' 앞부분만, 전화번호면 가운데를 가립니다 (01012345678 → 010****5678).
+export function maskPhone(s) {
+  const raw = String(s ?? '').trim()
+  if (!/^[\d\s.\-+()]+$/.test(raw)) return null
+  const d = raw.replace(/\D/g, '')
+  return d.length >= 9 ? d.slice(0, 3) + '****' + d.slice(-4) : null
+}
+
 export function displayName(name) {
   const s = String(name ?? '').trim()
   const at = s.indexOf('@')
-  return (at > 0 ? s.slice(0, at) : s) || '회원'
+  const base = at > 0 ? s.slice(0, at) : s
+  return maskPhone(base) ?? (base || '회원')
 }
