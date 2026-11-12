@@ -260,6 +260,13 @@ function doGet(e) {
 // 설치 후 편집기에서 한 번 실행해 권한을 승인하고 연결을 확인합니다.
 function setupCheck() {
   console.log('메일 남은 할당량:', MailApp.getRemainingDailyQuota())
+  // 키 JSON 점검 (비밀 값은 출력하지 않고 모양만)
+  var raw = prop_('SERVICE_ACCOUNT_JSON')
+  var sa = JSON.parse(raw)
+  var pk = String(sa.private_key || '')
+  console.log('키 JSON 길이:', raw.length, '/ 항목:', Object.keys(sa).join(', '))
+  console.log('type:', sa.type, '/ client_email:', sa.client_email)
+  console.log('private_key 길이:', pk.length, '/ BEGIN 있음:', pk.indexOf('BEGIN PRIVATE KEY') >= 0, '/ END 있음:', pk.indexOf('END PRIVATE KEY') >= 0)
   console.log('서비스 계정 토큰:', saToken_() ? 'OK' : '실패')
   console.log('Firestore 읽기:', getDoc_('counters/lessons') ? 'OK' : '문서 없음')
   var res = UrlFetchApp.fetch('https://identitytoolkit.googleapis.com/v1/projects/' + PROJECT_ID + '/accounts:lookup', {
