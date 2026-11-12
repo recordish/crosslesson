@@ -408,8 +408,6 @@ function MembersView() {
             <div><strong>{fresh.length.toLocaleString()}</strong><span>신규 가입 (전체)</span></div>
             <div><strong>{fresh.filter((r) => r.joinedAt >= now - 7 * DAY).length}</strong><span>최근 7일 가입</span></div>
             <div><strong>{fresh.filter((r) => r.joinedAt >= now - 30 * DAY).length}</strong><span>최근 30일 가입</span></div>
-            <div><strong>{fresh.filter((r) => !r.nickname).length}</strong><span>닉네임 미설정</span></div>
-            <div><strong>{returning.length.toLocaleString()}</strong><span>돌아온 기존 회원</span></div>
           </div>
           <section className="admin-card">
             <h2>{kind === 'new' ? '신규 가입자' : '돌아온 기존 회원'} ({shown.length})</h2>
