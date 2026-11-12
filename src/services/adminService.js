@@ -53,3 +53,11 @@ export async function getNicknames(uids) {
   )
   return Object.fromEntries(entries)
 }
+
+// 최근 레슨 신청 (관리자는 읽기만 할 수 있음)
+export async function listApplications(max = 200) {
+  const q = query(collection(db, 'applications'), orderBy('createdAt', 'desc'), limit(max))
+  const apps = (await getDocs(q)).docs.map((d) => ({ id: d.id, ...d.data() }))
+  const owners = await getNicknames(apps.map((a) => a.lessonOwnerUid))
+  return apps.map((a) => ({ ...a, ownerName: owners[a.lessonOwnerUid] ?? '' }))
+}

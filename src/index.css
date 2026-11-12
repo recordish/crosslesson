@@ -438,3 +438,17 @@ button.link.danger { color: var(--danger); padding-left: 0; }
 .card-row, .card-meta { overflow: hidden; }
 .card-meta > span, .card-meta > time { flex: none; }
 .card-meta > .card-schedule { flex: 0 1 auto; }
+.admin-msg { all: unset; cursor: pointer; white-space: pre-wrap; word-break: break-all; }
+.admin-msg:hover { color: var(--primary-text); }
+.admin-reply { margin: 4px 0 0; color: var(--muted); white-space: pre-wrap; }
+.apps .c-msg { max-width: 320px; }
+.apps .status { margin-left: 0; }
+@media (max-width: 640px) {
+  .apps .c-nick { order: 1; font-weight: 600; }
+  .apps .c-owner { order: 2; flex: 1; color: var(--muted); }
+  .apps .c-owner::before { content: '→ '; }
+  .apps .c-status { order: 3; }
+  .apps .c-lesson { order: 4; flex-basis: 100%; }
+  .apps .c-msg { order: 5; flex-basis: 100%; max-width: none; }
+  .apps .c-date { order: 6; flex-basis: 100%; color: var(--muted); font-size: 12px; }
+}

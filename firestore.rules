@@ -115,12 +115,12 @@ service cloud.firestore {
       function lessonOf(no) { return get(/databases/$(database)/documents/lessons/$(string(no))).data; }
       function isMine() { return appId.split('_')[1] == me(); }
 
-      // 하나씩 읽기: 신청자, 레슨 작성자. (내 신청이 없는지 확인하는 것도 허용)
+      // 하나씩 읽기: 신청자, 레슨 작성자. (내 신청이 없는지 확인하는 것도 허용) 관리자는 읽기만.
       allow get: if signedIn()
-        && (isMine() || resource.data.applicantUid == me() || resource.data.lessonOwnerUid == me());
-      // 목록: 내가 보낸 신청 또는 내 레슨에 온 신청만
+        && (isMine() || resource.data.applicantUid == me() || resource.data.lessonOwnerUid == me() || isAdmin());
+      // 목록: 내가 보낸 신청 또는 내 레슨에 온 신청만. 관리자는 전체 (읽기만)
       allow list: if signedIn()
-        && (resource.data.applicantUid == me() || resource.data.lessonOwnerUid == me());
+        && (resource.data.applicantUid == me() || resource.data.lessonOwnerUid == me() || isAdmin());
 
       allow create: if signedIn()
         && request.resource.data.keys().hasOnly(['lessonNo', 'lessonOwnerUid', 'lessonTeach', 'lessonLearns',

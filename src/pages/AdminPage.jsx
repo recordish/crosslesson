@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useTitle } from '../hooks/useTitle'
-import { getNicknames, isAdmin, listMembers, listVisits, MAX_VISITS, purgeOldVisits } from '../services/adminService'
+import { getNicknames, isAdmin, listApplications, listMembers, listVisits, MAX_VISITS, purgeOldVisits } from '../services/adminService'
 import { displayName } from '../data/displayName.js'
+import { categoryName } from '../data/categories'
 import { setNoTrack } from '../services/analytics'
 
 const PERIODS = [
@@ -168,6 +169,10 @@ export default function AdminPage() {
         <MembersView />
       </section>
       <hr className="admin-divider" />
+      <section id="admin-apps" className="admin-section">
+        <ApplicationsView />
+      </section>
+      <hr className="admin-divider" />
       <section id="admin-visits" className="admin-section">
         <VisitsView />
       </section>
@@ -177,6 +182,7 @@ export default function AdminPage() {
 
 const NAV = [
   { id: 'admin-members', label: '회원' },
+  { id: 'admin-apps', label: '레슨 신청' },
   { id: 'admin-visits', label: '방문 요약' },
   { id: 'admin-recent', label: '최근 방문' },
   { id: 'admin-sources', label: '유입·환경' },
@@ -442,4 +448,91 @@ function MembersView() {
       )}
     </>
   )
+}
+
+const APP_STATUS = { pending: '답변 대기', accepted: '수락', rejected: '거절' }
+
+// 레슨 신청 현황 (읽기만)
+function ApplicationsView() {
+  const [apps, setApps] = useState(null)
+  const [error, setError] = useState('')
+  const [open, setOpen] = useState(null)
+
+  useEffect(() => {
+    let alive = true
+    listApplications()
+      .then((a) => alive && setApps(a))
+      .catch((e) => {
+        console.error(e)
+        if (alive) setError('레슨 신청을 불러오지 못했어요.')
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  const now = Date.now()
+  const count = (fn) => apps?.filter(fn).length ?? 0
+
+  return (
+    <>
+      <div className="admin-head">
+        <h1>레슨 신청</h1>
+      </div>
+      <p className="muted admin-note">레슨 개설이 아니라 다른 회원의 레슨에 보낸 신청이에요. 관리자는 보기만 할 수 있어요. 메시지를 누르면 전체가 보여요.</p>
+      {error && <p className="error">{error}</p>}
+      {!apps && !error && <p className="empty">불러오는 중…</p>}
+      {apps && (
+        <>
+          <div className="admin-stats">
+            <div><strong>{apps.length}</strong><span>{apps.length >= 200 ? '최근 신청 200건' : '전체 신청'}</span></div>
+            <div><strong>{count((a) => a.createdAt >= now - 7 * DAY)}</strong><span>최근 7일</span></div>
+            <div><strong>{count((a) => a.status === 'pending')}</strong><span>답변 대기</span></div>
+            <div><strong>{count((a) => a.status === 'accepted')}</strong><span>수락</span></div>
+            <div><strong>{count((a) => a.status === 'rejected')}</strong><span>거절</span></div>
+          </div>
+          <section className="admin-card">
+            <h2>최근 신청 ({apps.length})</h2>
+            {apps.length === 0 ? (
+              <p className="muted">아직 신청이 없어요.</p>
+            ) : (
+              <div className="table-wrap">
+                <table className="admin-recent admin-stack apps">
+                  <thead>
+                    <tr><th>신청일</th><th>신청자</th><th>레슨</th><th>작성자</th><th>상태</th><th>메시지</th></tr>
+                  </thead>
+                  <tbody>
+                    {apps.map((a) => (
+                      <tr key={a.id}>
+                        <td className="c-date">{fmtDateTime(a.createdAt)}</td>
+                        <td className="c-nick">{displayName(a.applicantName)}</td>
+                        <td className="c-lesson">
+                          <a href={`/lesson/${a.lessonNo}`} target="_blank" rel="noreferrer">#{a.lessonNo}</a>{' '}
+                          <ExchangeText teach={a.lessonTeach} learns={a.lessonLearns} />
+                        </td>
+                        <td className="c-owner">{displayName(a.ownerName)}</td>
+                        <td className="c-status"><span className={`status s-${a.status}`}>{APP_STATUS[a.status] ?? a.status}</span></td>
+                        <td className="c-msg">
+                          <button type="button" className="admin-msg" onClick={() => setOpen(open === a.id ? null : a.id)}>
+                            {open === a.id ? a.message : a.message.length > 40 ? a.message.slice(0, 40) + '…' : a.message}
+                          </button>
+                          {open === a.id && a.reply && <p className="admin-reply">답장: {a.reply}</p>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        </>
+      )}
+    </>
+  )
+}
+
+function ExchangeText({ teach, learns }) {
+  const t = teach ? categoryName(teach) : ''
+  const l = (learns ?? []).map(categoryName).join(', ')
+  return <span className="muted">{t && l ? `${t} ⇄ ${l}` : t || l}</span>
 }

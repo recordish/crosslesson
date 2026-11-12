@@ -149,6 +149,13 @@ await t('visits: admin delete 2-year-old denied', assertFails(deleteDoc(doc(A, '
 await t('visits: non-admin delete old denied', assertFails(deleteDoc(doc(B, 'visits/old'))))
 await t('visits: admin delete old', assertSucceeds(deleteDoc(doc(A, 'visits/old'))))
 
+// 관리자: 레슨 신청 읽기만
+await env.withSecurityRulesDisabled((c) => setDoc(doc(c.firestore(), 'applications/77_userC'), { lessonNo: 77, lessonOwnerUid: 'userB', applicantUid: 'userC', status: 'pending', message: '안녕하세요', reply: '', createdAt: now, updatedAt: now }))
+await t('apps: admin list', assertSucceeds(getDocs(collection(A, 'applications'))))
+await t('apps: admin get', assertSucceeds(getDoc(doc(A, 'applications/77_userC'))))
+await t('apps: admin update denied', assertFails(updateDoc(doc(A, 'applications/77_userC'), { status: 'accepted', reply: '', updatedAt: Date.now() })))
+await t('apps: non-admin list all denied', assertFails(getDocs(collection(B, 'applications'))))
+
 // members (비공개 회원 기록)
 const Am = env.authenticatedContext('userA', { email: 'a@example.com' }).firestore()
 const Bm = env.authenticatedContext('userB', { email: 'b@example.com' }).firestore()
