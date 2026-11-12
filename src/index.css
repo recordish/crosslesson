@@ -352,7 +352,7 @@ button.link.danger { color: var(--danger); padding-left: 0; }
 
 /* ---------- 관리자 /admin ---------- */
 .admin h1 { margin: 0; font-size: 22px; }
-.admin-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.admin-head { margin-bottom: 14px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
 .admin-periods { display: flex; gap: 6px; }
 .admin-note { font-size: 13px; margin: 8px 0 16px; }
 .admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }

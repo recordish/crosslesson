@@ -277,9 +277,6 @@ function VisitsView() {
           ))}
         </div>
       </div>
-      <p className="muted admin-note">
-        검색 로봇·자동화 도구와 관리자 본인의 방문은 빠져 있어요. 닉네임 옆 *는 로그인 전 방문(같은 기기에서 로그인한 회원)이에요. 국가는 기기 시간대·언어로 추정한 값입니다. 2026년 11월 10일부터 기록합니다.
-      </p>
 
       {error && <p className="error">{error}</p>}
       {!s && !error && <p className="empty">불러오는 중…</p>}
@@ -403,10 +400,6 @@ function MembersView() {
           <button type="button" className={kind === 'legacy' ? 'chip on' : 'chip'} onClick={() => setKind('legacy')}>돌아온 기존 회원</button>
         </div>
       </div>
-      <p className="muted admin-note">
-        새 사이트에서 Google로 처음 로그인한 계정이 신규 가입이에요. 예전 사이트에서 옮겨 온 회원이 다시 로그인하면 &lsquo;돌아온 기존 회원&rsquo;에 보여요.
-        이메일은 관리자만 볼 수 있어요.
-      </p>
       {error && <p className="error">{error}</p>}
       {!rows && !error && <p className="empty">불러오는 중…</p>}
       {rows && (
@@ -479,7 +472,6 @@ function ApplicationsView() {
       <div className="admin-head">
         <h1>레슨 신청</h1>
       </div>
-      <p className="muted admin-note">레슨 개설이 아니라 다른 회원의 레슨에 보낸 신청이에요. 관리자는 보기만 할 수 있어요. 메시지를 누르면 전체가 보여요.</p>
       {error && <p className="error">{error}</p>}
       {!apps && !error && <p className="empty">불러오는 중…</p>}
       {apps && (
