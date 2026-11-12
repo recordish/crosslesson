@@ -182,10 +182,10 @@ export default function AdminPage() {
 
 const NAV = [
   { id: 'admin-members', label: '회원' },
-  { id: 'admin-apps', label: '레슨 신청' },
-  { id: 'admin-visits', label: '방문 요약' },
-  { id: 'admin-recent', label: '최근 방문' },
-  { id: 'admin-sources', label: '유입·환경' },
+  { id: 'admin-apps', label: '신청' },
+  { id: 'admin-visits', label: '방문' },
+  { id: 'admin-recent', label: '최근' },
+  { id: 'admin-sources', label: '유입' },
 ]
 
 // 화면 위에 붙는 메뉴: 누르면 그 영역으로 이동하고, 지금 보고 있는 영역을 표시합니다.
