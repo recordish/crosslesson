@@ -31,6 +31,15 @@ function json_(obj) {
 
 // ---------- 인증 ----------
 
+// 붙여 넣는 과정에서 줄바꿈이 사라지거나 \\n 글자로 바뀐 비공개 키를 PEM 모양으로 되돌립니다.
+function pemKey_(key) {
+  var k = String(key || '').replace(/\\n/g, '\n').replace(/\r/g, '')
+  var m = k.match(/-----BEGIN PRIVATE KEY-----([\s\S]*?)-----END PRIVATE KEY-----/)
+  if (!m) throw new Error('SERVICE_ACCOUNT_JSON 의 private_key 가 없거나 잘렸습니다. 키 JSON 파일 전체를 다시 붙여 넣으세요.')
+  var body = m[1].replace(/[^A-Za-z0-9+/=]/g, '')
+  return '-----BEGIN PRIVATE KEY-----\n' + body.match(/.{1,64}/g).join('\n') + '\n-----END PRIVATE KEY-----\n'
+}
+
 // 서비스 계정으로 Google API 접근 토큰 (50분 캐시)
 function saToken_() {
   var cache = CacheService.getScriptCache()
@@ -47,7 +56,7 @@ function saToken_() {
     iat: now,
     exp: now + 3600,
   }))
-  var sig = Utilities.base64EncodeWebSafe(Utilities.computeRsaSha256Signature(header + '.' + claim, sa.private_key)).replace(/=+$/, '')
+  var sig = Utilities.base64EncodeWebSafe(Utilities.computeRsaSha256Signature(header + '.' + claim, pemKey_(sa.private_key))).replace(/=+$/, '')
   var res = UrlFetchApp.fetch('https://oauth2.googleapis.com/token', {
     method: 'post',
     payload: { grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion: header + '.' + claim + '.' + sig },
