@@ -203,7 +203,7 @@ function AdminNav() {
 
   useEffect(() => {
     const onScroll = () => {
-      const line = top + 70
+      const line = top + (document.querySelector('.admin-tabs')?.offsetHeight ?? 56) + 40
       let current = NAV[0].id
       for (const n of NAV) {
         const el = document.getElementById(n.id)
@@ -220,7 +220,9 @@ function AdminNav() {
   function go(id) {
     const el = document.getElementById(id)
     if (!el) return
-    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - top - 56, behavior: 'instant' })
+    // 고정 메뉴 높이만큼 + 여백 20px 아래에 제목이 오도록
+    const navH = document.querySelector('.admin-tabs')?.offsetHeight ?? 56
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - top - navH - 20, behavior: 'instant' })
   }
 
   return (
