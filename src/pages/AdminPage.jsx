@@ -181,11 +181,11 @@ export default function AdminPage() {
 }
 
 const NAV = [
-  { id: 'admin-members', label: '회원' },
-  { id: 'admin-apps', label: '신청' },
-  { id: 'admin-visits', label: '방문' },
-  { id: 'admin-recent', label: '최근' },
-  { id: 'admin-sources', label: '유입' },
+  { id: 'admin-members', label: '회원', icon: <><circle cx="9" cy="8" r="3.2" /><path d="M3 19c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5" /><circle cx="17" cy="9" r="2.4" /><path d="M16 13.6c2.9.2 5 2.1 5 5.4" /></> },
+  { id: 'admin-apps', label: '신청', icon: <><rect x="3" y="5.5" width="18" height="13" rx="2" /><path d="m3.5 7 8.5 6.5L20.5 7" /></> },
+  { id: 'admin-visits', label: '방문', icon: <><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></> },
+  { id: 'admin-recent', label: '최근', icon: <><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></> },
+  { id: 'admin-sources', label: '유입', icon: <><circle cx="12" cy="12" r="8.5" /><path d="m15.5 8.5-2 5-5 2 2-5z" /></> },
 ]
 
 // 화면 위에 붙는 메뉴: 누르면 그 영역으로 이동하고, 지금 보고 있는 영역을 표시합니다.
@@ -227,7 +227,8 @@ function AdminNav() {
     <nav className="admin-tabs" style={{ top }}>
       {NAV.map((n) => (
         <button key={n.id} type="button" className={active === n.id ? 'on' : ''} onClick={() => go(n.id)}>
-          {n.label}
+          <svg className="admin-tab-icon" viewBox="0 0 24 24" aria-hidden="true">{n.icon}</svg>
+          <span>{n.label}</span>
         </button>
       ))}
     </nav>

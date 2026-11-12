@@ -452,3 +452,7 @@ button.link.danger { color: var(--danger); padding-left: 0; }
   .apps .c-msg { order: 5; flex-basis: 100%; max-width: none; }
   .apps .c-date { order: 6; flex-basis: 100%; color: var(--muted); font-size: 12px; }
 }
+/* 관리자 상단 메뉴: 5칸 20%씩, 아이콘 + 두 글자 */
+.admin-tabs { gap: 0; padding: 0; overflow: visible; }
+.admin-tabs button { flex: 1 1 20%; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0 7px; font-size: 12px; }
+.admin-tab-icon { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
